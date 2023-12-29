@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "hardhat/console.sol";
 
 contract EnderBondLiquidityDeposit is 
     Initializable, 
@@ -43,7 +44,7 @@ contract EnderBondLiquidityDeposit is
     }
 
     struct signData{
-        address admin;
+        address signer;
         uint256 key;
         bytes signature;
     }
@@ -70,6 +71,7 @@ contract EnderBondLiquidityDeposit is
         lido = _lido;
         signer = _signer;
         admin = _admin;
+        _transferOwnership(admin);
         bondableTokens[_stEth] = true;
         minDepositAmount = 100000000000000000; 
     }
@@ -93,7 +95,7 @@ contract EnderBondLiquidityDeposit is
     function setAdmin(address _admin) external onlyOwner{
         require(_admin != address(0), "Address can't be zero");
         admin = _admin;
-        emit newSigner(admin);
+        emit newAdmin(admin);
     }
 
     /**
@@ -162,9 +164,11 @@ contract EnderBondLiquidityDeposit is
         if (principal < minDepositAmount) revert InvalidAmount();
         if (maturity < 7 || maturity > 365 ) revert InvalidMaturity();
         if (token != address(0) && !bondableTokens[token]) revert NotBondableToken();
-        if (bondFee <= 0 || bondFee >= 10000) revert InvalidBondFee();   
-        address signer = _verify(userSign);
-        require(signer == signer, "user is not whitelisted");
+        if (bondFee <= 0 || bondFee >= 10000) revert InvalidBondFee();  
+        console.log("sssssss"); 
+        address signAddress = _verify(userSign);
+        console.log("sssssss--------", signAddress, signer); 
+        require(signAddress == signer, "user is not whitelisted");
         uint256 reward = IERC20(stEth).balanceOf(address(this)) - totalStaked;   
         if (reward > 0){
             calculatingSForReward();
@@ -191,6 +195,7 @@ contract EnderBondLiquidityDeposit is
         );
 
         emit Deposit(msg.sender, index, bondFee, principal, maturity, token);
+        console.log("0000000000000000");
     }
 
     /** 
@@ -246,9 +251,9 @@ contract EnderBondLiquidityDeposit is
                 keccak256(
                     abi.encode(
                         keccak256(
-                            "userSign(address admin,uint256 key)"
+                            "userSign(address signer,uint256 key)"
                         ),
-                        userSign.admin,
+                        userSign.signer,
                         userSign.key
                     )
                 )

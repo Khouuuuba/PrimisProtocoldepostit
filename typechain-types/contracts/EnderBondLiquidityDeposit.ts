@@ -25,16 +25,16 @@ import type {
 
 export declare namespace EnderBondLiquidityDeposit {
   export type SignDataStruct = {
-    admin: AddressLike;
+    signer: AddressLike;
     key: BigNumberish;
     signature: BytesLike;
   };
 
   export type SignDataStructOutput = [
-    admin: string,
+    signer: string,
     key: bigint,
     signature: string
-  ] & { admin: string; key: bigint; signature: string };
+  ] & { signer: string; key: bigint; signature: string };
 }
 
 export interface EnderBondLiquidityDepositInterface extends Interface {
@@ -88,7 +88,7 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
   encodeFunctionData(functionFragment: "admin", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "approvalForBond",
-    values: [AddressLike]
+    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "bondableTokens",
@@ -111,7 +111,7 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "depositedIntoBond",
-    values: [BigNumberish, AddressLike]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "eip712Domain",
@@ -475,7 +475,7 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   admin: TypedContractMethod<[], [string], "view">;
 
   approvalForBond: TypedContractMethod<
-    [_bond: AddressLike],
+    [_bond: AddressLike, _amount: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -511,7 +511,7 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   depositEnable: TypedContractMethod<[], [boolean], "view">;
 
   depositedIntoBond: TypedContractMethod<
-    [index: BigNumberish, _bond: AddressLike],
+    [index: BigNumberish],
     [
       [string, bigint, bigint, bigint] & {
         user: string;
@@ -623,7 +623,11 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "approvalForBond"
-  ): TypedContractMethod<[_bond: AddressLike], [void], "nonpayable">;
+  ): TypedContractMethod<
+    [_bond: AddressLike, _amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "bondableTokens"
   ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
@@ -661,7 +665,7 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   getFunction(
     nameOrSignature: "depositedIntoBond"
   ): TypedContractMethod<
-    [index: BigNumberish, _bond: AddressLike],
+    [index: BigNumberish],
     [
       [string, bigint, bigint, bigint] & {
         user: string;
