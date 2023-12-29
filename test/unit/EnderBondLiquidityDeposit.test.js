@@ -141,6 +141,9 @@ describe.only("enderBondLiquidityDeposit testing", function () {
         await StEth.connect(signer1).approve(enderBondLiquidityDepositAddress, depositPrincipalStEth);
         await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [signer4.address, 0, signature]);
         
+        await WETH.mint(signer1.address, depositPrincipalStEth);
+        await WETH.connect(signer1).transfer(stEthAddress, depositPrincipalStEth);
+        
         await WETH.mint(signer2.address, depositPrincipalStEth);
         await WETH.connect(signer2).approve(stEthAddress, depositPrincipalStEth);
         await StEth.connect(signer2).mintShare(depositPrincipalStEth);
@@ -158,20 +161,29 @@ describe.only("enderBondLiquidityDeposit testing", function () {
         await WETH.mint(signer2.address, depositPrincipalStEth);
         await WETH.connect(signer2).approve(stEthAddress, depositPrincipalStEth);
         await StEth.connect(signer2).mintShare(depositPrincipalStEth);
-        console.log(await StEth.connect(signer4).balanceOf(signer2.address),depositPrincipalStEth, "22");
+        console.log(await StEth.connect(signer2).balanceOf(signer2.address),depositPrincipalStEth, "22");
         await WETH.mint(signer1.address, depositPrincipalStEth);
         await WETH.connect(signer1).transfer(stEthAddress, depositPrincipalStEth);
-        console.log(await StEth.connect(signer4).balanceOf(signer2.address), "222");
         await WETH.mint(signer3.address, depositPrincipalStEth);
         await WETH.connect(signer3).approve(stEthAddress, depositPrincipalStEth);
         await StEth.connect(signer3).mintShare(depositPrincipalStEth);
-        console.log(await StEth.connect(signer4).balanceOf(signer3.address));
-        await StEth.connect(signer2).transfer(owner.address, 2000000000000000000n);
-        console.log(await StEth.connect(signer4).balanceOf(signer2.address),"2");
-        console.log(await StEth.connect(signer4).balanceOf(signer3.address), "3");
-        await StEth.connect(signer3).transfer(owner.address, 1500000000000000000n);
-        console.log(await StEth.connect(signer4).balanceOf(signer3.address), "3");
+        // console.log(await StEth.connect(signer2).balanceOf(signer2.address), "222");
+        // console.log(await StEth.connect(signer3).balanceOf(signer3.address),"333");
+        // await StEth.connect(signer2).transfer(owner.address, 2000000000000000000n);
+        console.log(await StEth.connect(signer2).balanceOf(signer2.address),"2");
+        console.log(await StEth.connect(signer3).balanceOf(signer3.address), "3");
+        // await StEth.connect(signer3).transfer(owner.address, 1000000000000000000n);
+        // console.log(await StEth.connect(signer3).balanceOf(signer3.address), "3");
 
+        await WETH.mint(signer1.address, depositPrincipalStEth);
+        await WETH.connect(signer1).transfer(stEthAddress, depositPrincipalStEth);
+
+        await WETH.mint(signer2.address, depositPrincipalStEth);
+        await WETH.connect(signer2).approve(stEthAddress, depositPrincipalStEth);
+        await StEth.connect(signer2).mintShare(depositPrincipalStEth);
+
+        console.log(await StEth.connect(signer3).balanceOf(signer3.address), "321321");
+        console.log(await StEth.connect(signer2).balanceOf(signer2.address),"123123");
 
 
         // console.log(await StEth.connect(signer4).balanceOf(wEthAddress));

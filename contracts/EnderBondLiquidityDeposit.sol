@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-import "hardhat/console.sol";
 
 contract EnderBondLiquidityDeposit is 
     Initializable, 
@@ -55,7 +54,6 @@ contract EnderBondLiquidityDeposit is
     error NotAllowed();
     error NotBondableToken();
     error addressNotWhitelisted();
-    event newAdmin(address _admin);
     event newSigner(address _signer);
     event depositEnableSet(bool depositEnable);
     event MinDepAmountSet(uint256 indexed newAmount);
@@ -90,12 +88,6 @@ contract EnderBondLiquidityDeposit is
         require(_signer != address(0), "Address can't be zero");
         signer = _signer;
         emit newSigner(signer);
-    }
-
-    function setAdmin(address _admin) external onlyOwner{
-        require(_admin != address(0), "Address can't be zero");
-        admin = _admin;
-        emit newAdmin(admin);
     }
 
     /**
@@ -165,9 +157,7 @@ contract EnderBondLiquidityDeposit is
         if (maturity < 7 || maturity > 365 ) revert InvalidMaturity();
         if (token != address(0) && !bondableTokens[token]) revert NotBondableToken();
         if (bondFee <= 0 || bondFee >= 10000) revert InvalidBondFee();  
-        console.log("sssssss"); 
         address signAddress = _verify(userSign);
-        console.log("sssssss--------", signAddress, signer); 
         require(signAddress == signer, "user is not whitelisted");
         uint256 reward = IERC20(stEth).balanceOf(address(this)) - totalStaked;   
         if (reward > 0){
@@ -195,7 +185,6 @@ contract EnderBondLiquidityDeposit is
         );
 
         emit Deposit(msg.sender, index, bondFee, principal, maturity, token);
-        console.log("0000000000000000");
     }
 
     /** 
@@ -222,8 +211,9 @@ contract EnderBondLiquidityDeposit is
     /**
     * @notice This function is call by ender bond contract when ender bond contract go live
     * @param index this is used to get user info of a particular user
+    * @notice For testing purpose we've revoke the access of onlyBond calling
      */
-    function depositedIntoBond(uint256 index) external onlyBond returns(address user, uint256 principal, uint256 bondFees, uint256 maturity){
+    function depositedIntoBond(uint256 index) external returns(address user, uint256 principal, uint256 bondFees, uint256 maturity){
         totalRewardOfUser[index] =   (bonds[index].principalAmount * (rewardShareIndex - rewardSharePerUserIndexStEth[index]));
         bonds[index].totalAmount = (bonds[index].principalAmount + (totalRewardOfUser[index])/expandTo6Decimal());  // dividing the user amount with 1e6
         emit userInfo(user, index, bonds[index].principalAmount, totalRewardOfUser[index], bonds[index].totalAmount, bonds[index].bondFees, bonds[index].maturity);

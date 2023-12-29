@@ -4,24 +4,24 @@ const SEndToken ="0xa57daa4136bfd8a0059b30b2652e906412a09426"
 const BondNFT =   "0xa760f4caf70b14c3d3fa03317b6a93ac973486d1"
 const EnderTreasury =   "0x55b6f413159d0eaaff1d8f290bd51bec1f343495"
 const EnderStaking =   "0xf2ac820b4c6bf23ab5d82c819f6684ea9e3cb601"
-const Weth =   "0xdC237426F384f715f5c7Faaa726F0db72e00C783"
-const MockStEth = "0xdBf0A86bd455bB0e7B0c4714D3e81c148F2d1E8C"
+const Weth =   "0x490f831634797DE90AdB3EA892d977af0264dc0D"
+const MockStEth = "0xdDf451A02E495219478e8077Ebb054b8F81ce8f3"
 const EnderLidoStrategy =   "0x9F306B7119F24e78A286265905E80af7a318f3AD"
 const EnderOracle = "0x4CE5090196f000C6C486af65af8b55A98bBC728a"
-const depositContract = "0x2a042b01f0a97b88f6ff73855cacbc5f465e7266"
+const depositContract = "0x6c7b5e9a14e4d7da6492471fa0f9977c60891c63"
  
 async function main() {
     try {
-        // await hre.run("verify:verify", {
-        // address: Weth,
-        // constructorArguments: ["wrappedEth", "weth", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"],
-        // contract: "contracts/ERC20/StEth.sol:mockWETH",
-        // });  
-        // await hre.run("verify:verify", {
-        //     address: MockStEth,
-        //     constructorArguments: [Weth, "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"],
-        //     contract: "contracts/ERC20/StEth.sol:MockStEth",
-        // });
+        await hre.run("verify:verify", {
+        address: Weth,
+        constructorArguments: ["wrappedEth", "weth", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"],
+        contract: "contracts/ERC20/StEth.sol:mockWETH",
+        });  
+        await hre.run("verify:verify", {
+            address: MockStEth,
+            constructorArguments: [Weth, "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"],
+            contract: "contracts/ERC20/StEth.sol:MockStEth",
+        });
 
         await hre.run("verify:verify", {
             address: depositContract,
