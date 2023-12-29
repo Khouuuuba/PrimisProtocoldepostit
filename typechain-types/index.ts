@@ -94,8 +94,6 @@ export type { IEnderOracle } from "./contracts/interfaces/IEnderOracle.sol/IEnde
 export { IEnderOracle__factory } from "./factories/contracts/interfaces/IEnderOracle.sol/IEnderOracle__factory";
 export type { IPriceFeed } from "./contracts/interfaces/IEnderOracle.sol/IPriceFeed";
 export { IPriceFeed__factory } from "./factories/contracts/interfaces/IEnderOracle.sol/IPriceFeed__factory";
-export type { IEnderPreLaunchDeposit } from "./contracts/interfaces/IEnderPreLaunchDeposit";
-export { IEnderPreLaunchDeposit__factory } from "./factories/contracts/interfaces/IEnderPreLaunchDeposit__factory";
 export type { IEnderStaking } from "./contracts/interfaces/IEnderStaking";
 export { IEnderStaking__factory } from "./factories/contracts/interfaces/IEnderStaking__factory";
 export type { IEnderStrategy } from "./contracts/interfaces/IEnderStrategy";

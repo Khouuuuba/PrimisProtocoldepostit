@@ -6,7 +6,6 @@ export { IBondNFT__factory } from "./IBondNFT__factory";
 export { IEndToken__factory } from "./IEndToken__factory";
 export { IEnderBond__factory } from "./IEnderBond__factory";
 export { IEnderBondLiquidityDeposit__factory } from "./IEnderBondLiquidityDeposit__factory";
-export { IEnderPreLaunchDeposit__factory } from "./IEnderPreLaunchDeposit__factory";
 export { IEnderStaking__factory } from "./IEnderStaking__factory";
 export { IEnderStrategy__factory } from "./IEnderStrategy__factory";
 export { IEnderTreasury__factory } from "./IEnderTreasury__factory";

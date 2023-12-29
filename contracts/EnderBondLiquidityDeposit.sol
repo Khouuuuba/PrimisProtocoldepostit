@@ -56,6 +56,7 @@ contract EnderBondLiquidityDeposit is
     error NotAllowed();
     error NotBondableToken();
     error addressNotWhitelisted();
+    event newAdmin(address _admin);
     event depositEnableSet(bool depositEnable);
     event MinDepAmountSet(uint256 indexed newAmount);
     event BondableTokensSet(address indexed token, bool indexed isEnabled);
@@ -63,11 +64,12 @@ contract EnderBondLiquidityDeposit is
     event Deposit(address indexed sender, uint256 index, uint256 bondFees, uint256 principal, uint256 maturity, address token);
     event userInfo(address indexed user, uint256 index, uint256 principal, uint256 Reward, uint256 totalAmount, uint256 bondFees, uint256 maturity);
 
-    function initialize(address _stEth, address _lido) public initializer {
+    function initialize(address _stEth, address _lido, address _admin) public initializer {
         __Ownable_init();
         __EIP712_init(SIGNING_DOMAIN, SIGNATURE_VERSION);
         stEth = _stEth;
         lido = _lido;
+        admin = _admin;
         bondableTokens[_stEth] = true;
         minDepositAmount = 100000000000000000; 
     }
@@ -80,6 +82,12 @@ contract EnderBondLiquidityDeposit is
     modifier onlyBond() {
         if (msg.sender != enderBond) revert NotAllowed();
         _;
+    }
+
+    function setAdmin(address _admin) external onlyOwner{
+        require(_admin == address(0), "Address can't be zero");
+        admin = _admin;
+        emit newAdmin(admin);
     }
 
     /**
@@ -150,7 +158,8 @@ contract EnderBondLiquidityDeposit is
         if (token != address(0) && !bondableTokens[token]) revert NotBondableToken();
         if (bondFee <= 0 || bondFee >= 10000) revert InvalidBondFee();   
         address signer = _verify(userSign);
-        require(signer == userSign.admin, "user is not whitelisted");
+        console.log(signer, admin);
+        require(signer == admin, "user is not whitelisted");
         console.log(IERC20(stEth).balanceOf(address(this)), totalStaked);
         uint256 reward = IERC20(stEth).balanceOf(address(this)) - totalStaked;   
         if (reward > 0){

@@ -65,7 +65,7 @@ describe.only("enderBondLiquidityDeposit testing", function () {
 
         enderBondLiquidityDeposit = await upgrades.deployProxy(
             EnderBondLiquidityBond,
-            [stEthAddress, stEthAddress],
+            [stEthAddress, stEthAddress, admin.address],
             {
               initializer: "initialize",
             }
@@ -132,13 +132,14 @@ describe.only("enderBondLiquidityDeposit testing", function () {
         const maturity = 90;
         const bondFee = 500;
         const depositPrincipalStEth = expandTo18Decimals(1);
+        console.log(signer4.address, admin.address, "admin");
         await enderBondLiquidityDeposit.setDepositEnable(true);
         await WETH.mint(signer1.address, depositPrincipalStEth);
         await WETH.connect(signer1).approve(stEthAddress, depositPrincipalStEth);
         await StEth.connect(signer1).mintShare(depositPrincipalStEth);
         let signature = await signatureDigest();
         await StEth.connect(signer1).approve(enderBondLiquidityDepositAddress, depositPrincipalStEth);
-        await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [admin.address, 0, signature]);
+        await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [signer4.address, 0, signature]);
 
         await WETH.mint(signer2.address, depositPrincipalStEth);
         await WETH.connect(signer2).approve(stEthAddress, depositPrincipalStEth);
@@ -146,7 +147,7 @@ describe.only("enderBondLiquidityDeposit testing", function () {
 
         let signature1 = await signatureDigest();
         await StEth.connect(signer2).approve(enderBondLiquidityDepositAddress, 1500000000000000000n);
-        await enderBondLiquidityDeposit.connect(signer2).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [admin.address, 0, signature1]);
+        await enderBondLiquidityDeposit.connect(signer2).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [signer4.address, 0, signature1]);
         await enderBondLiquidityDeposit.depositedIntoBond(1, enderBondAddress);
         await enderBondLiquidityDeposit.depositedIntoBond(2, enderBondAddress);
     });
@@ -172,7 +173,7 @@ describe.only("enderBondLiquidityDeposit testing", function () {
                 ],
             },
             {
-                admin: admin.address,
+                admin: signer4.address,
                 key: 0,
             }
         )

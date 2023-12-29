@@ -4,28 +4,28 @@ const SEndToken ="0xa57daa4136bfd8a0059b30b2652e906412a09426"
 const BondNFT =   "0xa760f4caf70b14c3d3fa03317b6a93ac973486d1"
 const EnderTreasury =   "0x55b6f413159d0eaaff1d8f290bd51bec1f343495"
 const EnderStaking =   "0xf2ac820b4c6bf23ab5d82c819f6684ea9e3cb601"
-const Weth =   "0x58Ec768d6454190e4e43F99F865F00c46563fd5F"
-const MockStEth = "0x63fcbA043697Ddad15412f880c075cA9E6683f81"
+const Weth =   "0xdC237426F384f715f5c7Faaa726F0db72e00C783"
+const MockStEth = "0xdBf0A86bd455bB0e7B0c4714D3e81c148F2d1E8C"
 const EnderLidoStrategy =   "0x9F306B7119F24e78A286265905E80af7a318f3AD"
 const EnderOracle = "0x4CE5090196f000C6C486af65af8b55A98bBC728a"
-const depositContract = "0xdf573d08fca3ad8625f2391eba603c19da7201ed"
+const depositContract = "0x2a042b01f0a97b88f6ff73855cacbc5f465e7266"
  
 async function main() {
     try {
-        await hre.run("verify:verify", {
-        address: Weth,
-        constructorArguments: ["wrappedEth", "weth", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"],
-        contract: "contracts/ERC20/StEth.sol:mockWETH",
-        });  
-        await hre.run("verify:verify", {
-            address: MockStEth,
-            constructorArguments: [Weth, "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"],
-            contract: "contracts/ERC20/StEth.sol:MockStEth",
-        });
+        // await hre.run("verify:verify", {
+        // address: Weth,
+        // constructorArguments: ["wrappedEth", "weth", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"],
+        // contract: "contracts/ERC20/StEth.sol:mockWETH",
+        // });  
+        // await hre.run("verify:verify", {
+        //     address: MockStEth,
+        //     constructorArguments: [Weth, "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"],
+        //     contract: "contracts/ERC20/StEth.sol:MockStEth",
+        // });
 
         await hre.run("verify:verify", {
             address: depositContract,
-            contract: "contracts/EnderPreLounchDeposit.sol:enderPreLounchDeposit",
+            contract: "contracts/EnderBondLiquidityDeposit.sol:EnderBondLiquidityDeposit",
         });
         // await hre.run("verify:verify", {
         //     address: EnderLidoStrategy,
