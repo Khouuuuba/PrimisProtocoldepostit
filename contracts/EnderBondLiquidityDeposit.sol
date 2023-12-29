@@ -85,13 +85,13 @@ contract EnderBondLiquidityDeposit is
     }
 
     function setsigner(address _signer) external onlyOwner{
-        require(_signer == address(0), "Address can't be zero");
+        require(_signer != address(0), "Address can't be zero");
         signer = _signer;
         emit newSigner(signer);
     }
 
     function setAdmin(address _admin) external onlyOwner{
-        require(_admin == address(0), "Address can't be zero");
+        require(_admin != address(0), "Address can't be zero");
         admin = _admin;
         emit newSigner(admin);
     }
@@ -229,10 +229,11 @@ contract EnderBondLiquidityDeposit is
     /**
     * @notice This function is call by Admin address when ender bond contract go live for approval of stEth
     * @param _bond The address of ender bond
+    * @param _amount this input is used for approval
      */
-    function approvalForBond(address _bond) external onlyOwner{
+    function approvalForBond(address _bond, uint256 _amount) external onlyOwner{
         require(_bond == address(0), "Address can't be zero");
-        IERC20(stEth).approve(_bond, totalStaked);
+        IERC20(stEth).approve(_bond, _amount);
     }
 
     function _hash(signData memory userSign)
