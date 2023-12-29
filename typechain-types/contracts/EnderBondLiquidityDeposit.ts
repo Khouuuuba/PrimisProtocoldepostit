@@ -41,6 +41,7 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "admin"
+      | "approvalForBond"
       | "bondableTokens"
       | "bonds"
       | "deposit"
@@ -61,6 +62,8 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
       | "setBondableTokens"
       | "setDepositEnable"
       | "setMinDepAmount"
+      | "setsigner"
+      | "signer"
       | "stEth"
       | "totalRewardOfUser"
       | "totalStaked"
@@ -78,10 +81,15 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
       | "WhitelistChanged"
       | "depositEnableSet"
       | "newAdmin"
+      | "newSigner"
       | "userInfo"
   ): EventFragment;
 
   encodeFunctionData(functionFragment: "admin", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "approvalForBond",
+    values: [AddressLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "bondableTokens",
     values: [AddressLike]
@@ -113,7 +121,7 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
   encodeFunctionData(functionFragment: "index", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [AddressLike, AddressLike, AddressLike]
+    values: [AddressLike, AddressLike, AddressLike, AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "lido", values?: undefined): string;
   encodeFunctionData(
@@ -153,6 +161,11 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
     functionFragment: "setMinDepAmount",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "setsigner",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(functionFragment: "signer", values?: undefined): string;
   encodeFunctionData(functionFragment: "stEth", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "totalRewardOfUser",
@@ -168,6 +181,10 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "admin", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "approvalForBond",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "bondableTokens",
     data: BytesLike
@@ -221,6 +238,8 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
     functionFragment: "setMinDepAmount",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setsigner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "signer", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "stEth", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "totalRewardOfUser",
@@ -364,6 +383,18 @@ export namespace newAdminEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace newSignerEvent {
+  export type InputTuple = [_signer: AddressLike];
+  export type OutputTuple = [_signer: string];
+  export interface OutputObject {
+    _signer: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace userInfoEvent {
   export type InputTuple = [
     user: AddressLike,
@@ -443,6 +474,12 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
 
   admin: TypedContractMethod<[], [string], "view">;
 
+  approvalForBond: TypedContractMethod<
+    [_bond: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   bondableTokens: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
 
   bonds: TypedContractMethod<
@@ -507,7 +544,12 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   index: TypedContractMethod<[], [bigint], "view">;
 
   initialize: TypedContractMethod<
-    [_stEth: AddressLike, _lido: AddressLike, _admin: AddressLike],
+    [
+      _stEth: AddressLike,
+      _lido: AddressLike,
+      _signer: AddressLike,
+      _admin: AddressLike
+    ],
     [void],
     "nonpayable"
   >;
@@ -554,6 +596,8 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
     "nonpayable"
   >;
 
+  setsigner: TypedContractMethod<[_signer: AddressLike], [void], "nonpayable">;
+
   stEth: TypedContractMethod<[], [string], "view">;
 
   totalRewardOfUser: TypedContractMethod<
@@ -577,6 +621,9 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   getFunction(
     nameOrSignature: "admin"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "approvalForBond"
+  ): TypedContractMethod<[_bond: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "bondableTokens"
   ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
@@ -651,7 +698,12 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   getFunction(
     nameOrSignature: "initialize"
   ): TypedContractMethod<
-    [_stEth: AddressLike, _lido: AddressLike, _admin: AddressLike],
+    [
+      _stEth: AddressLike,
+      _lido: AddressLike,
+      _signer: AddressLike,
+      _admin: AddressLike
+    ],
     [void],
     "nonpayable"
   >;
@@ -696,6 +748,12 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   getFunction(
     nameOrSignature: "setMinDepAmount"
   ): TypedContractMethod<[_amt: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setsigner"
+  ): TypedContractMethod<[_signer: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "signer"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "stEth"
   ): TypedContractMethod<[], [string], "view">;
@@ -771,6 +829,13 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
     newAdminEvent.InputTuple,
     newAdminEvent.OutputTuple,
     newAdminEvent.OutputObject
+  >;
+  getEvent(
+    key: "newSigner"
+  ): TypedContractEvent<
+    newSignerEvent.InputTuple,
+    newSignerEvent.OutputTuple,
+    newSignerEvent.OutputObject
   >;
   getEvent(
     key: "userInfo"
@@ -878,6 +943,17 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
       newAdminEvent.InputTuple,
       newAdminEvent.OutputTuple,
       newAdminEvent.OutputObject
+    >;
+
+    "newSigner(address)": TypedContractEvent<
+      newSignerEvent.InputTuple,
+      newSignerEvent.OutputTuple,
+      newSignerEvent.OutputObject
+    >;
+    newSigner: TypedContractEvent<
+      newSignerEvent.InputTuple,
+      newSignerEvent.OutputTuple,
+      newSignerEvent.OutputObject
     >;
 
     "userInfo(address,uint256,uint256,uint256,uint256,uint256,uint256)": TypedContractEvent<

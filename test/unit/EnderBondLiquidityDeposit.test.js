@@ -65,13 +65,13 @@ describe.only("enderBondLiquidityDeposit testing", function () {
 
         enderBondLiquidityDeposit = await upgrades.deployProxy(
             EnderBondLiquidityBond,
-            [stEthAddress, stEthAddress, admin.address],
+            [stEthAddress, stEthAddress, admin.address, owner.address],
             {
               initializer: "initialize",
             }
           );
 
-          enderBond = await upgrades.deployProxy(
+        enderBond = await upgrades.deployProxy(
               EnderBond,
               [endTokenAddress, ethers.ZeroAddress, ethers.ZeroAddress],
               {
