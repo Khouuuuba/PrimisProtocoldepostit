@@ -6,6 +6,7 @@ export type { iEnderOracleSol };
 export type { IBondNFT } from "./IBondNFT";
 export type { IEndToken } from "./IEndToken";
 export type { IEnderBond } from "./IEnderBond";
+export type { IEnderBondLiquidityDeposit } from "./IEnderBondLiquidityDeposit";
 export type { IEnderPreLaunchDeposit } from "./IEnderPreLaunchDeposit";
 export type { IEnderStaking } from "./IEnderStaking";
 export type { IEnderStrategy } from "./IEnderStrategy";

@@ -88,6 +88,8 @@ export type { IBondNFT } from "./contracts/interfaces/IBondNFT";
 export { IBondNFT__factory } from "./factories/contracts/interfaces/IBondNFT__factory";
 export type { IEnderBond } from "./contracts/interfaces/IEnderBond";
 export { IEnderBond__factory } from "./factories/contracts/interfaces/IEnderBond__factory";
+export type { IEnderBondLiquidityDeposit } from "./contracts/interfaces/IEnderBondLiquidityDeposit";
+export { IEnderBondLiquidityDeposit__factory } from "./factories/contracts/interfaces/IEnderBondLiquidityDeposit__factory";
 export type { IEnderOracle } from "./contracts/interfaces/IEnderOracle.sol/IEnderOracle";
 export { IEnderOracle__factory } from "./factories/contracts/interfaces/IEnderOracle.sol/IEnderOracle__factory";
 export type { IPriceFeed } from "./contracts/interfaces/IEnderOracle.sol/IPriceFeed";

@@ -15,7 +15,7 @@ async function main() {
     const EnderBond = await ethers.getContractFactory("EnderBond");
     const EnderTreasury = await ethers.getContractFactory("EnderTreasury");
     const EnderStaking = await ethers.getContractFactory("EnderStaking");
-    const DepositContract = await ethers.getContractFactory("enderPreLounchDeposit");
+    const DepositContract = await ethers.getContractFactory("EnderBondLiquidityDeposit");
     const oracle = await ethers.getContractFactory("EnderOracle");
     let endTokenAddress,
         wEthAddress,

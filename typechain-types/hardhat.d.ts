@@ -178,6 +178,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IEnderBond__factory>;
     getContractFactory(
+      name: "IEnderBondLiquidityDeposit",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IEnderBondLiquidityDeposit__factory>;
+    getContractFactory(
       name: "IEnderOracle",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IEnderOracle__factory>;
@@ -500,6 +504,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IEnderBond>;
     getContractAt(
+      name: "IEnderBondLiquidityDeposit",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IEnderBondLiquidityDeposit>;
+    getContractAt(
       name: "IEnderOracle",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -810,6 +819,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IEnderBond>;
     deployContract(
+      name: "IEnderBondLiquidityDeposit",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IEnderBondLiquidityDeposit>;
+    deployContract(
       name: "IEnderOracle",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IEnderOracle>;
@@ -1131,6 +1144,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IEnderBond>;
+    deployContract(
+      name: "IEnderBondLiquidityDeposit",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IEnderBondLiquidityDeposit>;
     deployContract(
       name: "IEnderOracle",
       args: any[],
