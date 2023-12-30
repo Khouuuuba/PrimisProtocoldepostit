@@ -26,15 +26,15 @@ import type {
 export declare namespace EnderBondLiquidityDeposit {
   export type SignDataStruct = {
     signer: AddressLike;
-    key: BigNumberish;
+    key: string;
     signature: BytesLike;
   };
 
   export type SignDataStructOutput = [
     signer: string,
-    key: bigint,
+    key: string,
     signature: string
-  ] & { signer: string; key: bigint; signature: string };
+  ] & { signer: string; key: string; signature: string };
 }
 
 export interface EnderBondLiquidityDepositInterface extends Interface {

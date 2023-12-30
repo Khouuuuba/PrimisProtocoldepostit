@@ -41,17 +41,17 @@ async function main() {
         bondNFT;
 
         await sleep(9000);
-    wEth = await weth.deploy("wrappedEth", "weth", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9");
-    wEthAddress = await wEth.getAddress();
-    console.log("wEthAddress--> ", wEthAddress);
-    await sleep(9000);
+    // wEth = await weth.deploy("wrappedEth", "weth", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9");
+    // wEthAddress = await wEth.getAddress();
+    // console.log("wEthAddress--> ", wEthAddress);
+    // await sleep(9000);
 
-    stEth = await StEth.deploy(wEthAddress, "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9");
-    stEthAddress = await stEth.getAddress();
-    console.log("stEthAddress-->", stEthAddress)
-    await sleep(9000);
+    // stEth = await StEth.deploy(wEthAddress, "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9");
+    // stEthAddress = await stEth.getAddress();
+    // console.log("stEthAddress-->", stEthAddress)
+    // await sleep(9000);
 
-    depositContract = await upgrades.deployProxy(DepositContract, [stEthAddress, stEthAddress, "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"], {
+    depositContract = await upgrades.deployProxy(DepositContract, ["0xdDf451A02E495219478e8077Ebb054b8F81ce8f3", "0xdDf451A02E495219478e8077Ebb054b8F81ce8f3", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9"], {
         initializer: "initialize",
     });
     await sleep(9000);

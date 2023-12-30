@@ -44,7 +44,7 @@ contract EnderBondLiquidityDeposit is
 
     struct signData{
         address signer;
-        uint256 key;
+        string key;
         bytes signature;
     }
     error InvalidAmount();
@@ -241,10 +241,10 @@ contract EnderBondLiquidityDeposit is
                 keccak256(
                     abi.encode(
                         keccak256(
-                            "userSign(address signer,uint256 key)"
+                            "userSign(address signer,string key)"
                         ),
                         userSign.signer,
-                        userSign.key
+                        keccak256(bytes(userSign.key))
                     )
                 )
             );

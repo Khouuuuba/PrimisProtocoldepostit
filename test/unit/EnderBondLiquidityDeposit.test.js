@@ -102,7 +102,7 @@ describe.only("enderBondLiquidityDeposit testing", function () {
         await StEth.connect(signer1).mintShare(depositPrincipalStEth);
         let signature = await signatureDigest();
         await StEth.connect(signer1).approve(enderBondLiquidityDepositAddress, depositPrincipalStEth);
-        await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [admin.address, 0, signature]);
+        await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [admin.address, "0", signature]);
     });
 
     it("enderBondLiquidityDeposit:- deposit function also checking reward share index", async() => {
@@ -115,7 +115,7 @@ describe.only("enderBondLiquidityDeposit testing", function () {
         await StEth.connect(signer1).mintShare(depositPrincipalStEth);
         let signature = await signatureDigest();
         await StEth.connect(signer1).approve(enderBondLiquidityDepositAddress, depositPrincipalStEth);
-        await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [admin.address, 0, signature]);
+        await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [admin.address, "0", signature]);
         
         await WETH.mint(signer2.address, depositPrincipalStEth);
         await WETH.connect(signer2).approve(stEthAddress, depositPrincipalStEth);
@@ -125,7 +125,7 @@ describe.only("enderBondLiquidityDeposit testing", function () {
         await WETH.connect(signer1).transfer(stEthAddress, depositPrincipalStEth);
         let signature1 = await signatureDigest();
         await StEth.connect(signer2).approve(enderBondLiquidityDepositAddress, 1500000000000000000n);
-        await enderBondLiquidityDeposit.connect(signer2).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [admin.address, 0, signature1]);
+        await enderBondLiquidityDeposit.connect(signer2).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [admin.address, "0", signature1]);
     });
 
     it.only("enderBondLiquidityDeposit:- multiple deposit", async() => {
@@ -139,11 +139,11 @@ describe.only("enderBondLiquidityDeposit testing", function () {
         await StEth.connect(signer1).mintShare(depositPrincipalStEth);
         let signature = await signatureDigest();
         await StEth.connect(signer1).approve(enderBondLiquidityDepositAddress, depositPrincipalStEth);
-        await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [signer4.address, 0, signature]);
+        await enderBondLiquidityDeposit.connect(signer1).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [signer4.address, "0", signature]);
         
         await WETH.mint(signer1.address, depositPrincipalStEth);
         await WETH.connect(signer1).transfer(stEthAddress, depositPrincipalStEth);
-        
+
         await WETH.mint(signer2.address, depositPrincipalStEth);
         await WETH.connect(signer2).approve(stEthAddress, depositPrincipalStEth);
         await StEth.connect(signer2).mintShare(depositPrincipalStEth);
@@ -151,7 +151,7 @@ describe.only("enderBondLiquidityDeposit testing", function () {
         let signature1 = await signatureDigest();
         console.log("ddddd");
         await StEth.connect(signer2).approve(enderBondLiquidityDepositAddress, 1500000000000000000n);
-        await enderBondLiquidityDeposit.connect(signer2).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [signer4.address, 0, signature1]);
+        await enderBondLiquidityDeposit.connect(signer2).deposit(depositPrincipalStEth, maturity, bondFee, stEthAddress, [signer4.address, "0", signature1]);
         await enderBondLiquidityDeposit.depositedIntoBond(1);
         await enderBondLiquidityDeposit.depositedIntoBond(2);
     });
@@ -206,13 +206,13 @@ describe.only("enderBondLiquidityDeposit testing", function () {
                     },
                     {
                         name: 'key',
-                        type: 'uint256',
+                        type: 'string',
                     },
                 ],
             },
             {
                 signer: signer4.address,
-                key: 0,
+                key: "0",
             }
         )
         return sig;
