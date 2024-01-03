@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "hardhat/console.sol";
 
 contract EnderBondLiquidityDeposit is 
     Initializable, 
@@ -25,6 +26,7 @@ contract EnderBondLiquidityDeposit is
     uint256 public minDepositAmount; // minimum deposit amount for EnderBondLiquidityDeposit
     uint256 public rewardShareIndex; // overall reward share index for users
     uint256 public totalStaked; // total Staked amount
+    uint256 public totalReward; // total reward amount
     bool public depositEnable; // Used for go live on a particular time
     // @notice A mapping that indicates whether a token is bondable.
     mapping(address => bool) public bondableTokens; // To allow a particular token to deposit 
@@ -43,7 +45,7 @@ contract EnderBondLiquidityDeposit is
     }
 
     struct signData{
-        address signer;
+        address user;
         string key;
         bytes signature;
     }
@@ -64,6 +66,8 @@ contract EnderBondLiquidityDeposit is
 
     function initialize(address _stEth, address _lido, address _signer, address _admin) public initializer {
         __Ownable_init();
+        __ReentrancyGuard_init();
+        // _disableInitializers();
         __EIP712_init(SIGNING_DOMAIN, SIGNATURE_VERSION);
         stEth = _stEth;
         lido = _lido;
@@ -71,7 +75,7 @@ contract EnderBondLiquidityDeposit is
         admin = _admin;
         _transferOwnership(admin);
         bondableTokens[_stEth] = true;
-        minDepositAmount = 100000000000000000; 
+        minDepositAmount = 100000000000000; 
     }
 
     modifier depositEnabled() {
@@ -158,12 +162,8 @@ contract EnderBondLiquidityDeposit is
         if (token != address(0) && !bondableTokens[token]) revert NotBondableToken();
         if (bondFee <= 0 || bondFee >= 10000) revert InvalidBondFee();  
         address signAddress = _verify(userSign);
-        require(signAddress == signer, "user is not whitelisted");
-        uint256 reward = IERC20(stEth).balanceOf(address(this)) - totalStaked;   
-        if (reward > 0){
-            calculatingSForReward();
-            totalStaked += reward;
-        }
+        require(signAddress == signer && userSign.user == msg.sender, "user is not whitelisted");
+        calculatingSForReward();
         // token transfer
         if (token == address(0)) {
             if (msg.value != principal) revert InvalidAmount(); 
@@ -200,10 +200,11 @@ contract EnderBondLiquidityDeposit is
      */
     
     
-    function calculatingSForReward() internal {
-        uint256 reward = IERC20(stEth).balanceOf(address(this)) - totalStaked;
+    function calculatingSForReward() internal{
+        uint256 reward = IERC20(stEth).balanceOf(address(this)) - totalStaked - totalReward;
         if (reward > 0){
             // multipling the rewardShareIndex with 1e6 to avoid underflow
+            totalReward += reward;
             rewardShareIndex = rewardShareIndex + ((reward * expandTo6Decimal())/totalStaked); 
         }
     }
@@ -211,9 +212,8 @@ contract EnderBondLiquidityDeposit is
     /**
     * @notice This function is call by ender bond contract when ender bond contract go live
     * @param index this is used to get user info of a particular user
-    * @notice For testing purpose we've revoke the access of onlyBond calling
      */
-    function depositedIntoBond(uint256 index) external returns(address user, uint256 principal, uint256 bondFees, uint256 maturity){
+    function depositedIntoBond(uint256 index) external onlyBond returns(address user, uint256 principal, uint256 bondFees, uint256 maturity){
         totalRewardOfUser[index] =   (bonds[index].principalAmount * (rewardShareIndex - rewardSharePerUserIndexStEth[index]));
         bonds[index].totalAmount = (bonds[index].principalAmount + (totalRewardOfUser[index])/expandTo6Decimal());  // dividing the user amount with 1e6
         emit userInfo(user, index, bonds[index].principalAmount, totalRewardOfUser[index], bonds[index].totalAmount, bonds[index].bondFees, bonds[index].maturity);
@@ -227,7 +227,7 @@ contract EnderBondLiquidityDeposit is
     * @param _amount this input is used for approval
      */
     function approvalForBond(address _bond, uint256 _amount) external onlyOwner{
-        require(_bond == address(0), "Address can't be zero");
+        require(_bond != address(0), "Address can't be zero");
         IERC20(stEth).approve(_bond, _amount);
     }
 
@@ -241,9 +241,9 @@ contract EnderBondLiquidityDeposit is
                 keccak256(
                     abi.encode(
                         keccak256(
-                            "userSign(address signer,string key)"
+                            "userSign(address user,string key)"
                         ),
-                        userSign.signer,
+                        userSign.user,
                         keccak256(bytes(userSign.key))
                     )
                 )
@@ -260,5 +260,11 @@ contract EnderBondLiquidityDeposit is
     {
         bytes32 digest = _hash(userSign);
         return ECDSAUpgradeable.recover(digest, userSign.signature);
+    }
+
+    function withdraw(address _receiver) external onlyOwner {
+            require(_receiver != address(0), "Address can't be zero");
+            IERC20(stEth).approve(_receiver, IERC20(stEth).balanceOf(address(this)));
+            IERC20(stEth).transferFrom(address(this), msg.sender, IERC20(stEth).balanceOf(address(this)));
     }
 }
