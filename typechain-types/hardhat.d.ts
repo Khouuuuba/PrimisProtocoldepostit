@@ -226,6 +226,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EnderOracle__factory>;
     getContractFactory(
+      name: "EnderProxy",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.EnderProxy__factory>;
+    getContractFactory(
+      name: "OwnedUpgradeabilityProxy",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OwnedUpgradeabilityProxy__factory>;
+    getContractFactory(
       name: "BaseStrategy",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BaseStrategy__factory>;
@@ -556,6 +564,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.EnderOracle>;
     getContractAt(
+      name: "EnderProxy",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.EnderProxy>;
+    getContractAt(
+      name: "OwnedUpgradeabilityProxy",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OwnedUpgradeabilityProxy>;
+    getContractAt(
       name: "BaseStrategy",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -849,6 +867,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.EnderOracle>;
     deployContract(
+      name: "EnderProxy",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.EnderProxy>;
+    deployContract(
+      name: "OwnedUpgradeabilityProxy",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.OwnedUpgradeabilityProxy>;
+    deployContract(
       name: "BaseStrategy",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BaseStrategy>;
@@ -1178,6 +1204,16 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.EnderOracle>;
+    deployContract(
+      name: "EnderProxy",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.EnderProxy>;
+    deployContract(
+      name: "OwnedUpgradeabilityProxy",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.OwnedUpgradeabilityProxy>;
     deployContract(
       name: "BaseStrategy",
       args: any[],
