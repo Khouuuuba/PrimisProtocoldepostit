@@ -101,6 +101,9 @@ async function main() {
     depositContractAddress = await depositContract.getAddress();
     console.log("depositContractAddress-->", depositContractAddress);
 
+    // await upgrades.upgradeProxy("0x41f0Cc6865Ae1cA32d096b3bE317ae84C48A99e8",DepositContract);
+    // console.log(upgrades.upgradeProxy);
+
 //     instaDappLite = await InstaDapp.deploy("InstaToken", "Inst", "0xEe7CA89760a3425Bc06d8aFA201e80C22E5B94E9", stEthAddress);
 //     InstaDappAddress = await instaDappLite.getAddress();
 //     console.log("InstadappAddress-->", InstaDappAddress);

@@ -102,6 +102,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165Upgradeable__factory>;
     getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC20__factory>;
@@ -209,6 +213,10 @@ declare module "hardhat/types/runtime" {
       name: "ISEndToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ISEndToken__factory>;
+    getContractFactory(
+      name: "IStEth",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IStEth__factory>;
     getContractFactory(
       name: "BondNFT",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -393,6 +401,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
+      name: "Ownable",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable>;
+    getContractAt(
       name: "ERC20",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -527,6 +540,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.ISEndToken>;
+    getContractAt(
+      name: "IStEth",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IStEth>;
     getContractAt(
       name: "BondNFT",
       address: string | ethers.Addressable,
@@ -707,6 +725,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC165Upgradeable>;
     deployContract(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Ownable>;
+    deployContract(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ERC20>;
@@ -814,6 +836,10 @@ declare module "hardhat/types/runtime" {
       name: "ISEndToken",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ISEndToken>;
+    deployContract(
+      name: "IStEth",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IStEth>;
     deployContract(
       name: "BondNFT",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -998,6 +1024,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC165Upgradeable>;
     deployContract(
+      name: "Ownable",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Ownable>;
+    deployContract(
       name: "ERC20",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -1132,6 +1163,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ISEndToken>;
+    deployContract(
+      name: "IStEth",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IStEth>;
     deployContract(
       name: "BondNFT",
       args: any[],

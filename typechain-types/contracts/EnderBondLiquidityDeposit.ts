@@ -64,9 +64,7 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
       | "setsigner"
       | "signer"
       | "stEth"
-      | "totalReward"
       | "totalRewardOfUser"
-      | "totalStaked"
       | "transferOwnership"
       | "withdraw"
   ): FunctionFragment;
@@ -164,16 +162,8 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
   encodeFunctionData(functionFragment: "signer", values?: undefined): string;
   encodeFunctionData(functionFragment: "stEth", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "totalReward",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "totalRewardOfUser",
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "totalStaked",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -245,15 +235,7 @@ export interface EnderBondLiquidityDepositInterface extends Interface {
   decodeFunctionResult(functionFragment: "signer", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "stEth", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "totalReward",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "totalRewardOfUser",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "totalStaked",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -396,7 +378,6 @@ export namespace userInfoEvent {
     user: AddressLike,
     index: BigNumberish,
     principal: BigNumberish,
-    Reward: BigNumberish,
     totalAmount: BigNumberish,
     bondFees: BigNumberish,
     maturity: BigNumberish
@@ -405,7 +386,6 @@ export namespace userInfoEvent {
     user: string,
     index: bigint,
     principal: bigint,
-    Reward: bigint,
     totalAmount: bigint,
     bondFees: bigint,
     maturity: bigint
@@ -414,7 +394,6 @@ export namespace userInfoEvent {
     user: string;
     index: bigint;
     principal: bigint;
-    Reward: bigint;
     totalAmount: bigint;
     bondFees: bigint;
     maturity: bigint;
@@ -507,7 +486,7 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   depositEnable: TypedContractMethod<[], [boolean], "view">;
 
   depositedIntoBond: TypedContractMethod<
-    [index: BigNumberish],
+    [_index: BigNumberish],
     [
       [string, bigint, bigint, bigint] & {
         user: string;
@@ -594,15 +573,11 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
 
   stEth: TypedContractMethod<[], [string], "view">;
 
-  totalReward: TypedContractMethod<[], [bigint], "view">;
-
   totalRewardOfUser: TypedContractMethod<
     [arg0: BigNumberish],
     [bigint],
     "view"
   >;
-
-  totalStaked: TypedContractMethod<[], [bigint], "view">;
 
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
@@ -663,7 +638,7 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
   getFunction(
     nameOrSignature: "depositedIntoBond"
   ): TypedContractMethod<
-    [index: BigNumberish],
+    [_index: BigNumberish],
     [
       [string, bigint, bigint, bigint] & {
         user: string;
@@ -757,14 +732,8 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
     nameOrSignature: "stEth"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "totalReward"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "totalRewardOfUser"
   ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "totalStaked"
-  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
@@ -943,7 +912,7 @@ export interface EnderBondLiquidityDeposit extends BaseContract {
       newSignerEvent.OutputObject
     >;
 
-    "userInfo(address,uint256,uint256,uint256,uint256,uint256,uint256)": TypedContractEvent<
+    "userInfo(address,uint256,uint256,uint256,uint256,uint256)": TypedContractEvent<
       userInfoEvent.InputTuple,
       userInfoEvent.OutputTuple,
       userInfoEvent.OutputObject
