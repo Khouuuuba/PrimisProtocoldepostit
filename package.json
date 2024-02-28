@@ -1,7 +1,7 @@
 {
-  "name": "enderprotocol-contracts",
+  "name": "primisprotocol-contracts",
   "version": "1.0.0",
-  "description": "Smart Contracts for Ender Protocol",
+  "description": "Smart Contracts for Primis Protocol",
   "directories": {
     "test": "test"
   },
@@ -44,7 +44,7 @@
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
     "compile": "hardhat compile",
     "clean": "hardhat clean",
-    "test": "hardhat test test/unit/EnderBond.test.js",
+    "test": "hardhat test test/unit/PrimisBond.test.js",
     "gas": "REPORT_GAS=true hardhat test",
     "coverage": "hardhat coverage",
     "coverage:unit": "hardhat coverage --testfiles test/unit/*.test.js",
@@ -63,13 +63,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/enderprotocol/enderprotocol-contracts.git"
+    "url": "git+https://github.com/primisprotocol/primisprotocol-contracts.git"
   },
   "author": "",
   "bugs": {
-    "url": "https://github.com/enderprotocol/enderprotocol-contracts/issues"
+    "url": "https://github.com/primisprotocol/primisprotocol-contracts/issues"
   },
-  "homepage": "https://github.com/enderprotocol/enderprotocol-contracts#readme",
+  "homepage": "https://github.com/primisprotocol/primisprotocol-contracts#readme",
   "dependencies": {
     "@chainlink/contracts": "^0.8.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
