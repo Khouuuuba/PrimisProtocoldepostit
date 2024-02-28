@@ -8,7 +8,7 @@ pragma solidity ^0.8.0;
  * @title OwnedUpgradeabilityProxy
  * @dev This contract combines an upgradeability proxy with basic authorization control functionalities
  */
-contract EnderProxy {
+contract PrimisProxy {
     /**
      * @dev Event to show ownership has been transferred
      * @param previousOwner representing the address of the previous owner
@@ -23,11 +23,11 @@ contract EnderProxy {
     event Upgraded(address indexed implementation);
 
     // Storage position of the address of the maintenance boolean
-    bytes32 private constant maintenancePosition = keccak256("com.Ender.proxy.maintenance");
+    bytes32 private constant maintenancePosition = keccak256("com.Primis.proxy.maintenance");
     // Storage position of the address of the current implementation
-    bytes32 private constant implementationPosition = keccak256("com.Ender.proxy.implementation");
+    bytes32 private constant implementationPosition = keccak256("com.Primis.proxy.implementation");
     // Storage position of the owner of the contract
-    bytes32 private constant proxyOwnerPosition = keccak256("com.Ender.proxy.owner");
+    bytes32 private constant proxyOwnerPosition = keccak256("com.Primis.proxy.owner");
 
     /**
      * @dev the constructor sets the original owner of the contract to the sender account.
