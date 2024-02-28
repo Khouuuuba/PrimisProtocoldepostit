@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-Liicense-Identifier: MIT
 pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 interface IInstadappLite is IERC20{
