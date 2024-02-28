@@ -26,6 +26,6 @@ deployments/sepolia
 /.dapp
 
 
-# OpenZeppelin upgradeable files
+# OpenZeppelin upgradeablee files
 .openzeppelin/
 /flatten
