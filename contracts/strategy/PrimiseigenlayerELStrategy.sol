@@ -40,7 +40,7 @@ interface IStrategyManager {
     ) external;
 }
 
-contract EnderELStrategy is BaseStrategy {
+contract PrimisELStrategy is BaseStrategy {
     uint256 private constant strategyIndex = 0;
 
     IStrategy public tokenStrategy;
@@ -69,7 +69,7 @@ contract EnderELStrategy is BaseStrategy {
      * @notice Function for deposit
      * @param param deposit parameters
      */
-    function deposit(EndRequest memory param) public onlyTreasury returns (uint256) {
+    function deposit(PrmRequest memory param) public onlyTreasury returns (uint256) {
         // approve token first
         IERC20(param.stakingToken).approve(strategy, param.tokenAmt);
 
@@ -82,7 +82,7 @@ contract EnderELStrategy is BaseStrategy {
      * @notice Function for withdraw request
      * @param param withdraw request parameters
      */
-    function withdrawRequest(EndRequest memory param) external onlyTreasury {
+    function withdrawRequest(PrmRequest memory param) external onlyTreasury {
         if (queueBlock[param.account] != 0) revert AlreadyRequested();
 
         unchecked {
@@ -106,7 +106,7 @@ contract EnderELStrategy is BaseStrategy {
      * @notice Function for withdraw
      * @param param withdraw parameters
      */
-    function withdrawStEth(EndRequest memory param) external onlyTreasury returns (uint256) {
+    function withdrawStEth(PrmRequest memory param) external onlyTreasury returns (uint256) {
         if (queueBlock[param.account] == 0) revert NotRequested();
 
         IStrategyManager.WithdrawerAndNonce memory param1 = IStrategyManager.WithdrawerAndNonce(
