@@ -12,12 +12,12 @@ import "hardhat/console.sol";
 
 // Interfaces
 import "./interfaces/IBondNFT.sol";
-import "./interfaces/IEnderBondLiquidityDeposit.sol";
-import "./interfaces/IEnderTreasury.sol";
-import "./interfaces/IEnderOracle.sol";
-import "./interfaces/ISEndToken.sol";
-import "./interfaces/IEndToken.sol";
-import "./interfaces/IEnderStaking.sol";
+import "./interfaces/IPrimisBondLiquidityDeposit.sol";
+import "./interfaces/IPrimisTreasury.sol";
+import "./interfaces/IPrimisOracle.sol";
+import "./interfaces/ISPrmToken.sol";
+import "./interfaces/IPrmToken.sol";
+import "./interfaces/IPrimisStaking.sol";
 
 
 error BondAlreadyWithdrawn();
@@ -37,15 +37,15 @@ error NoRewardCollected();
 error NotTreasury();
 error NotKeeper();
 error NotAllowed();
-error NotEnderStaking();
-error NotEndToken();
+error NotPrimisStaking();
+error NotPrmToken();
 error NoTreasury();
 
 /**
- * @title EnderBond contract
+ * @title PrimisBond contract
  * @dev Implements bonding functionality with multiple tokens
  */
-contract EnderBond is
+contract PrimisBond is
     Initializable,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
@@ -93,7 +93,7 @@ contract EnderBond is
     uint256 public totalDeposit;
     uint256 public bondYieldShareIndex;
     uint256 public totalBondPrincipalAmount;
-    uint256 public endMint;
+    uint256 public prmMint;
     uint256 public bondYieldBaseRate;
     uint256 public txFees;
     uint256 public minDepositAmount;
@@ -115,19 +115,19 @@ contract EnderBond is
     uint256[] public maturities;
 
     address public signer;
-    address private endSignature;
-    address private endToken;
-    address private sEndToken;
+    address private prmSignature;
+    address private prmToken;
+    address private sPrmToken;
     address public lido;
     address public stEth;
     address public keeper;
-    // address public endStaking;
+    // address public PrmStaking;
 
     IBondNFT private bondNFT;
-    IEnderBondLiquidityDeposit private depositContract;
-    IEnderTreasury private endTreasury;
-    IEnderOracle private enderOracle;
-    IEnderStaking private endStaking;
+    IPrimisBondLiquidityDeposit private depositContract;
+    IPrimisTreasury private prmTreasury;
+    IPrimisOracle private  prmOracle;
+    IPrimisStaking private prmStaking;
 
     bool public depositEnable;  // status of deposit-feature (enabled/disabled)
     bool public isWithdrawPause;   // status of withdraw-pause
@@ -137,7 +137,7 @@ contract EnderBond is
     struct Bond {
         bool withdrawn; // The withdrawn status of the bond
         uint256 principal; // The principal amount of the bond
-        // uint256 endAmt; // The END token amount of deposit
+        // uint256 endAmt; // The PRM token amount of deposit
         uint256 startTime; // Timestamp of the bond
         uint256 maturity; // The maturity date of the bond
         address token; // The token used for the bond
@@ -172,7 +172,7 @@ event RefractionRewardsClaimed(address indexed sender, uint256 indexed tokenId, 
 event StakingRewardsClaimed(address indexed sender, uint256 indexed tokenId, uint256 rewardAmount);
 event RewardShareIndexUpdated(uint256 indexed newRewardShareIndex);
 event BondYieldShareIndexUpdated(uint256 indexed newBondYieldShareIndex);
-event EndMintReset();
+event PrmMintReset();
 event newSigner(address _signer);
 event WhitelistChanged(bool indexed action);
 event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRewardSharePerUserIndex);
@@ -180,19 +180,19 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
 
     /**
      * @dev Initializes the contract
-     * @param endToken_ The address of the END token
+     * @param prmToken_ The address of the PRM token
      */
-    function initialize(address endToken_, address _lido, address _oracle, address _signer) public initializer {
+    function initialize(address prmToken_, address _lido, address _oracle, address _signer) public initializer {
         __Ownable_init();
-        __EIP712_init("EnderBond", "1");
+        __EIP712_init("PrimisBond", "1");
         rateOfChange = 100;
         lido = _lido;
-        setAddress(endToken_, 2);
+        setAddress(prmToken_, 2);
         // todo set the value according to doc
         minDepositAmount = 1000000000000000;
         txFees = 200;
         signer = _signer;
-        enderOracle = IEnderOracle(_oracle);
+        primisOracle = IPrimisOracle(_oracle);
         bondYieldBaseRate = 100;
         SECONDS_IN_DAY = 600; // note for testing purpose we have set it to 10 mint
         interval = 10 * 60; // note for testing purpose we have set it to 10 mint
@@ -240,16 +240,16 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
     function setAddress(address _addr, uint256 _type) public onlyOwner {
         if (_addr == address(0)) revert ZeroAddress();
 
-        if (_type == 1) endTreasury = IEnderTreasury(_addr);
-        else if (_type == 2) endToken = _addr;
+        if (_type == 1) prmTreasury = IPrimisTreasury(_addr);
+        else if (_type == 2) prmToken = _addr;
         else if (_type == 3) bondNFT = IBondNFT(_addr);
-        else if (_type == 4) endSignature = _addr;
+        else if (_type == 4) prmSignature = _addr;
         else if (_type == 5) lido = _addr;
         else if (_type == 6) stEth = _addr;
         else if (_type == 7) keeper = _addr;
-        else if (_type == 8) endStaking = IEnderStaking(_addr);
-        else if (_type == 9) sEndToken = _addr;
-        else if (_type == 10) depositContract = IEnderBondLiquidityDeposit(_addr);
+        else if (_type == 8) prmStaking = IPrimisStaking(_addr);
+        else if (_type == 9) sPrmToken = _addr;
+        else if (_type == 10) depositContract = IPrimisBondLiquidityDeposit(_addr);
 
         emit AddressSet(_type, _addr);
     }
@@ -276,10 +276,10 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
     }
 
     function getAddress(uint256 _type) external view returns (address addr) {
-        if (_type == 1) addr = address(endTreasury);
-        else if (_type == 2) addr = endToken;
+        if (_type == 1) addr = address(prmTreasury);
+        else if (_type == 2) addr = prmToken;
         else if (_type == 3) addr = address(bondNFT);
-        else if (_type == 4) addr = endSignature;
+        else if (_type == 4) addr = prmSignature;
         else if (_type == 5) addr = lido;
     }
 
@@ -392,8 +392,8 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
             address signAddress = _verify(userSign);
             require(signAddress == signer && userSign.user == msg.sender, "user is not whitelisted");
         }
-        IEndToken(endToken).distributeRefractionFees();
-        uint256 beforeBalance = IERC20(stEth).balanceOf(address(endTreasury));
+        IPrmToken(prmToken).distributeRefractionFees();
+        uint256 beforeBalance = IERC20(stEth).balanceOf(address(prmTreasury));
         // token transfer
         if (token == address(0)) {
             if (msg.value != principal) revert InvalidAmount();
@@ -403,14 +403,14 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
             require(suc, "lido eth deposit failed");                                                                
             IERC20(stEth).transfer(address(endTreasury), IERC20(stEth).balanceOf(address(this)));                  
         } else {                                                                                                   
-            // send directly to the ender treasury
-            IERC20(token).transferFrom(msg.sender, address(endTreasury), principal);                                
+            // send directly to the primis treasury
+            IERC20(token).transferFrom(msg.sender, address(prmTreasury), principal);                                
         }
-        uint256 afterBalance = IERC20(stEth).balanceOf(address(endTreasury));                                                  
+        uint256 afterBalance = IERC20(stEth).balanceOf(address(prmTreasury));                                                  
         principal = afterBalance - beforeBalance;                                                                                
         tokenId = _deposit(user, principal, maturity, token, bondFee);                                                              
         epochBondYieldShareIndex();                                                                                                 
-        // IEnderStaking(endStaking).epochStakingReward(stEth);
+        // IPrimisStaking(prmStaking).epochStakingReward(stEth);
         emit Deposit(msg.sender, tokenId, principal, maturity, token);
     }
 
@@ -421,7 +421,7 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
         address token,
         uint256 bondFee
     ) private returns (uint256 tokenId) {
-        endTreasury.depositTreasury(IEnderBase.EndRequest(user, token, principal), getLoopCount());
+       prmTreasury.depositTreasury(IPrimisBase.PrmRequest(user, token, principal), getLoopCount());
         principal = (principal * (10000 - bondFee)) / 10000;
         // uint256 timeNow = block.timestamp / SECONDS_IN_DAY;
         // dayToBondYieldShareUpdation[timeNow].push(block.timestamp + (maturity * SECONDS_IN_DAY));
@@ -487,14 +487,14 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
         if (bondNFT.ownerOf(_tokenId) != msg.sender) revert NotBondUser();
         if (block.timestamp <= bond.startTime + (bond.maturity * SECONDS_IN_DAY)) revert BondNotMatured();
         // require(block.timestamp >= bond.startTime + (bond.maturity * SECONDS_IN_DAY), "Bond is not matured");     
-        IEndToken(endToken).distributeRefractionFees();
+        IPrmToken(prmToken).distributeRefractionFees();
         // update current bond 
         bond.withdrawn = true;
-        endTreasury.withdraw(IEnderBase.EndRequest(msg.sender, bond.token, bond.principal), getLoopCount());
+        prmTreasury.withdraw(IPrimisBase.PrmRequest(msg.sender, bond.token, bond.principal), getLoopCount());
         uint256 reward = calculateBondRewardAmount(_tokenId, bond.YieldIndex);
         dayBondYieldShareIndex[bonds[_tokenId].maturity] = userBondYieldShareIndex[_tokenId]; 
 
-        endTreasury.mintEndToUser(msg.sender, reward);
+        prmTreasury.mintPrmToUser(msg.sender, reward);
         if(rewardShareIndex != rewardSharePerUserIndex[_tokenId]) claimRefractionRewards(_tokenId, bond.refractionSIndex);
         if(rewardShareIndexSend != rewardSharePerUserIndexSend[_tokenId]) claimStakingReward(_tokenId, bond.stakingSendIndex);
 
@@ -546,7 +546,7 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
                 // } 
             }
             lastDay = currentDay;
-            uint256 balanceInTreasury = ISEndToken(stEth).balanceOf(address(endTreasury));
+            uint256 balanceInTreasury = ISPrmToken(stEth).balanceOf(address(prmTreasury));
             if (amountRequired <= balanceInTreasury){ 
                 withdrawAmntFromSt = 0;
             }
@@ -578,10 +578,10 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
     function epochRewardShareIndex(uint256 _reward) external {
         // if (msg.sender != keeper) revert NotKeeper();
         // if (totalRewardPrincipal == 0) revert WaitForFirstDeposit();
-        if(msg.sender != endToken) revert NotEndToken();
+        if(msg.sender != prmToken) revert NotPrmToken();
 
         if (totalRefractionPrincipal - refractionAmountRequired != 0) {
-            IERC20(endToken).transferFrom(endToken, address(this), _reward);
+            IERC20(prmToken).transferFrom(prmToken, address(this), _reward);
             uint256 timeNow = block.timestamp / SECONDS_IN_DAY;
             
             rewardShareIndex =
@@ -625,7 +625,7 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
 
     function epochRewardShareIndexForSend(uint256 _reward) public {
         // if (msg.sender != keeper) revert NotKeeper();
-        if(msg.sender != address(endStaking)) revert NotEnderStaking();
+        if(msg.sender != address(prmStaking)) revert NotPrimisStaking();
         if (totalDeposit - amountRequired != 0) {
             uint256 timeNow = block.timestamp / SECONDS_IN_DAY;
            rewardShareIndexSend =
@@ -701,16 +701,16 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
     function epochBondYieldShareIndex() public {
         // if (msg.sender != keeper) revert NotKeeper();
 
-        // (uint256 priceEth, uint256 ethDecimal) = enderOracle.getPrice(address(0));
-        // (uint256 priceEnd, uint256 endDecimal) = enderOracle.getPrice(address(endToken));
+        // (uint256 priceEth, uint256 ethDecimal) = primisOracle.getPrice(address(0));
+        // (uint256 priceEnd, uint256 endDecimal) = primisOracle.getPrice(address(prmToken));
         if(totalBondPrincipalAmount - depositAmountRequired != 0){
-            (uint stETHPool, uint ENDSupply) = endTreasury.ETHDenomination(stEth);
+            (uint stETHPool, uint PRMSupply) = prmTreasury.ETHDenomination(stEth);
             uint256 timeNow = block.timestamp / SECONDS_IN_DAY;
             uint256 finalRewardPrincipal = (totalBondPrincipalAmount - depositAmountRequired);
-            // uint256 _endMint = (priceEth * finalRewardPrincipal)/priceEnd;
-            uint256 _endMint = (finalRewardPrincipal * stETHPool * 1000) / ENDSupply;
-            endMint += _endMint;
-            bondYieldShareIndex = bondYieldShareIndex + ((_endMint) / finalRewardPrincipal);
+            // uint256 _prmMint = (priceEth * finalRewardPrincipal)/pricePrm;
+            uint256 _prmMint = (finalRewardPrincipal * stETHPool * 1000) / PRMSupply;
+            prmMint += _prmMint;
+            bondYieldShareIndex = bondYieldShareIndex + ((_prmMint) / finalRewardPrincipal);
             dayBondYieldShareIndex[timeNow] = bondYieldShareIndex;
             secondsBondYieldShareIndex[timeNow] = bondYieldShareIndex;
             emit BondYieldShareIndexUpdated(bondYieldShareIndex);
@@ -769,9 +769,9 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
         if (precalUsers != 0) {
             // (, uint rewardPrincipal) = calculateStakingPendingReward(temp.principal, temp.maturity, _tokenId);
             // uint rewardPrincipal = temp.principal;
-            uint sEndTokenReward = ((rewardPrincipal * (precalUsers - rewardSharePerUserIndexSend[_tokenId])) / 1e18);
-            if (sEndTokenReward > 0) {
-                ISEndToken(sEndToken).transfer(msg.sender, sEndTokenReward);
+            uint sPrmTokenReward = ((rewardPrincipal * (precalUsers - rewardSharePerUserIndexSend[_tokenId])) / 1e18);
+            if (sPrmTokenReward > 0) {
+                ISPrmToken(sPrmToken).transfer(msg.sender, sPrmTokenReward);
             }
         } else {
             if (bondNFT.ownerOf(_tokenId) != msg.sender) revert NotBondUser();
@@ -780,11 +780,11 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
                 // (, uint rewardPrincipal) = calculateStakingPendingReward(temp.principal, temp.maturity, _tokenId);
 
                 if (dayRewardShareIndexForSend[(block.timestamp / SECONDS_IN_DAY)] != 0 && block.timestamp / SECONDS_IN_DAY == bonds[_tokenId].maturity + (bonds[_tokenId].startTime/SECONDS_IN_DAY)) {
-                    uint sEndTokenReward = ((rewardPrincipal *
+                    uint sPrmTokenReward = ((rewardPrincipal *
                         (rewardShareIndexSend - rewardSharePerUserIndexSend[_tokenId])) / 1e18);
 
-                    if (sEndTokenReward > 0) {
-                        ISEndToken(sEndToken).transfer(msg.sender, sEndTokenReward);
+                    if (sPrmTokenReward > 0) {
+                        ISPrmToken(sPrmToken).transfer(msg.sender, sPrmTokenReward);
                     }
                 } else {
                     uint256 sTime;
@@ -798,10 +798,10 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
 
                     }
                     uint256 userS = secondsRefractionShareIndexSend[sTime];
-                    uint sEndTokenReward = ((rewardPrincipal * (userS - rewardSharePerUserIndexSend[_tokenId])) / 1e18);
+                    uint sPrmTokenReward = ((rewardPrincipal * (userS - rewardSharePerUserIndexSend[_tokenId])) / 1e18);
 
-                    if (sEndTokenReward > 0) {
-                        ISEndToken(sEndToken).transfer(msg.sender, sEndTokenReward);
+                    if (sPrmTokenReward > 0) {
+                        ISPrmToken(sPrmToken).transfer(msg.sender, sPrmTokenReward);
                     }
                 }
                 rewardSharePerUserIndexSend[_tokenId] = rewardShareIndexSend;
@@ -822,7 +822,7 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
         if (precalUsers != 0) {
             // uint rewardPrincipal = temp.principal;
             // (, uint rewardPrincipal) = calculateRefractionData(temp.principal, temp.maturity, _tokenId);
-            IERC20(endToken).transfer(
+            IERC20(prmToken).transfer(
                 msg.sender,
                 ((rewardPrincipal * (precalUsers - rewardSharePerUserIndex[_tokenId])) / 1e18)
             );
@@ -834,7 +834,7 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
                 // uint rewardPrincipal = temp.principal;
                 // (, uint rewardPrincipal) = calculateRefractionData(temp.principal, temp.maturity, _tokenId);
                 if (dayToRewardShareIndex[(block.timestamp / SECONDS_IN_DAY)] != 0 && block.timestamp / SECONDS_IN_DAY == bonds[_tokenId].maturity + (bonds[_tokenId].startTime/SECONDS_IN_DAY)){ 
-                    IERC20(endToken).transfer(
+                    IERC20(prmToken).transfer(
                         msg.sender,
                         ((rewardPrincipal * (rewardShareIndex - rewardSharePerUserIndex[_tokenId])) / 1e18)
                     );
@@ -849,7 +849,7 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
                         );
                     }
                     uint256 userS = secondsRefractionShareIndex[sTime];
-                    IERC20(endToken).transfer(
+                    IERC20(prmToken).transfer(
                         msg.sender,
                         ((rewardPrincipal * (userS - rewardSharePerUserIndex[_tokenId])) / 1e18)
                     );
@@ -898,7 +898,7 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
         if ((block.timestamp - lastTimeStamp) > interval) {
             lastTimeStamp = block.timestamp;
             epochBondYieldShareIndex();
-            endStaking.epochStakingReward(stEth);
+            prmStaking.epochStakingReward(stEth);
             getLoopCount();
         }
         // We don't use the performData in this example. The performData is generated by the Keeper's call to your checkUpkeep function
@@ -912,12 +912,12 @@ event RewardSharePerUserIndexSet(uint256 indexed tokenId, uint256 indexed newRew
     }
 
     function resetEndMint() external{
-        require(msg.sender == address(endTreasury));
-        endMint = 0;
+        require(msg.sender == address(prmTreasury));
+        prmMint = 0;
     }
 
     function setAvailableBondFee(uint amount) external {
-        if(msg.sender != address(endTreasury)) revert NoTreasury();
+        if(msg.sender != address(prmTreasury)) revert NoTreasury();
         availableBondFee -= amount;
     }
     
