@@ -1,15 +1,15 @@
-# Technical Documentation for EnderBond Contract
+# Technical Documentation for PrimisBond Contract
 
  ## Overview
 
-The EnderBond contract is a Solidity smart contract designed to implement bonding functionality for multiple tokens on the Ethereum blockchain. The contract allows users to deposit their assets into a bond, which locks the funds for a specified period and provides potential rewards. 
+The PrimisBond contract is a Solidity smart contract designed to implement bonding functionality for multiple tokens on the Ethereum blockchain. The contract allows users to deposit their assets into a bond, which locks the funds for a specified period and provides potential rewards. 
 ### Contract Structure
 
-The EnderBond contract is structured as follows:
+The PrimisBond contract is structured as follows:
 
-- Initialization: The contract is initialized with parameters like the END token address, Lido contract address, and Oracle contract address. The owner of the contract can set other parameters like the minimum deposit amount, transaction fees, and bond yield base rate.
+- Initialization: The contract is initialized with parameters like the PRM token address, Lido contract address, and Oracle contract address. The owner of the contract can set other parameters like the minimum deposit amount, transaction fees, and bond yield base rate.
 
-- Address Management: The contract includes functions to set and retrieve addresses related to various external contracts and services, such as the EnderTreasury, END token, BondNFT, EnderSignature, Lido, and more.
+- Address Management: The contract includes functions to set and retrieve addresses related to various external contracts and services, such as the PrimisTreasury, PRM token, BondNFT, PrimisSignature, Lido, and more.
 
 - Bondable Tokens: The contract maintains a mapping of bondable tokens, allowing the owner to specify which tokens can be used for bonding.
 
@@ -43,35 +43,35 @@ The EnderBond contract is structured as follows:
 
 ### External Contracts and Interfaces
 
-The EnderBond contract interacts with various external contracts and interfaces, including:
+The PrimisBond contract interacts with various external contracts and interfaces, including:
 
-- EnderTreasury: The EnderTreasury contract is used to handle the deposit and withdrawal of funds, including the management of rewards.
+- PrimisTreasury: The PrimisTreasury contract is used to handle the deposit and withdrawal of funds, including the management of rewards.
 
 - BondNFT: The BondNFT contract is used for minting and managing NFTs that represent bonds.
 
 
 - Lido: The Lido contract is used to manage ETH deposits.
 
-- EnderOracle: The EnderOracle contract provides price data for ETH and END tokens.
+- PrimisOracle: The PrimisOracle contract provides price data for ETH and PRM tokens.
 
 
 
 
-function initialize(address endToken_, address _lido, address _oracle) public initializer
+function initialize(address prmToken_, address _lido, address _oracle) public initializer
 
 
    - Description: Initializes the contract with essential parameters.
    - Parameters:
-     - `endToken_`: The address of the END token.
+     - `prmToken_`: The address of the PRM token.
      - `_lido`: The address of the Lido contract.
-     - `_oracle`: The address of the EnderOracle contract.
+     - `_oracle`: The address of the PrimisOracle contract.
 
    function setAddress(address _addr, uint256 _type) public onlyOwner 
 
    - Description: Allows the contract owner to update various contract addresses.
    - Parameters:
      - `_addr`: The address to be updated.
-     - `_type`: Type of address to update (1 for EnderTreasury, 2 for END token, 3 for BondNFT, 4 for EnderSignature, 5 for Lido, 6 for stEth).
+     - `_type`: Type of address to update (1 for PrimisTreasury, 2 for PRM token, 3 for BondNFT, 4 for PrimisSignature, 5 for Lido, 6 for stEth).
 
    function setMinDepAmount(uint256 _amt) public onlyOwner
 
@@ -208,13 +208,13 @@ It checks if the current timestamp is less than the bond's maturity date (bond.s
 
 If all conditions are met, the function updates the bond's status by marking it as withdrawn (bond.withdrawn = true), indicating that the bond has been successfully withdrawn.
 
-It initiates the withdrawal from the endTreasury contract, passing an EndRequest struct with relevant information, including the user's address, the bond's associated token, and the principal amount. Additionally, it triggers the getLoopCount function, which is used to calculate the amount required for that particular maturity.
+It initiates the withdrawal from the PrmTreasury contract, passing an PRMRequest struct with relevant information, including the user's address, the bond's associated token, and the principal amount. Additionally, it triggers the getLoopCount function, which is used to calculate the amount required for that particular maturity.
 
 The function calculates the reward the user will receive for the bond using the calculateBondRewardAmount function.
 
 It updates the dayBondYieldShareIndex for the maturity date of the bond with the userBondYieldShareIndex associated with the bond. This index is implemented to prevent the user from withdrawing extra rewards after the withdrawal.
 
-The function transfers the calculated reward to the user's address using the mintEndToUser function from the endTreasury contract.
+The function transfers the calculated reward to the user's address using the mintPrmToUser function from the prmTreasury contract.
 
 It checks if the user needs to claim refraction rewards or staking rewards manually. If the rewardShareIndex does not match rewardSharePerUserIndex[_tokenId], the user need not to claim refraction rewards using the claimRefractionRewards function. Similarly, if rewardSharePerUserIndexSend[_tokenId] does not match rewardShareIndexSend, the user need not to claim staking rewards using the claimStakingReward function.
 
@@ -237,17 +237,17 @@ function getLoopCount() public returns (uint256 amountRequired)
 function epochRewardShareIndex(uint256 _reward) external
 
 
-    - Description: Updates the reward share for a given end Token reward amount at the beginning of an epoch.
+    - Description: Updates the reward share for a given prm Token reward amount at the beginning of an epoch.
     - Parameters:
       - `_reward`: The reward to be added to the reward share.
 
  function epochRewardShareIndexForSend(uint256 _reward, uint256 _totalPrinciple) public
 
 
-    - Description: Updates the reward share for Send token at the beginning of an epoch.
+    - Description: Updates the reward share for Sprm token at the beginning of an epoch.
     - Parameters:
       - `_reward`: The reward to be added to the reward share.
-      - `_totalPrinciple`: The total principle amount used for calculating the Send token reward share.
+      - `_totalPrinciple`: The total principle amount used for calculating the Sprm token reward share.
 
    function epochBondYieldShareIndex() external onlyOwner
 
@@ -310,9 +310,9 @@ function calculateBondRewardAmount(uint256 _tokenId) internal view returns (uint
 
 
 
- ## EnderTreasury Smart Contract
+ ## PrimisTreasury Smart Contract
  
-The "EnderTreasury" smart contract is designed to manage various financial activities related to the Ender platform. It interacts with different strategies to handle deposits, withdrawals, and yields.
+The "PrimisTreasury" smart contract is designed to manage various financial activities related to the Primis platform. It interacts with different strategies to handle deposits, withdrawals, and yields.
 
  ### State Variables
 
@@ -321,13 +321,13 @@ The "EnderTreasury" smart contract is designed to manage various financial activ
 - totalAssetStakedInStrategy: A mapping to store the total assets staked in different strategies.
 - totalRewardsFromStrategy: A mapping to track total rewards obtained from different strategies.
 - strategyToReceiptToken: A mapping to associate strategy contracts with receipt tokens.
-- endToken: The address of the END token contract.
-- enderBond: The address of the Ender bond contract.
-- enderDepositor: The address of the Ender depositor contract (not set explicitly in the provided code).
-- enderStaking: The address of the Ender staking contract.
+- prmToken: The address of the PRM token contract.
+- PrimisBond: The address of the Primis bond contract.
+- primisDepositor: The address of the Primis depositor contract (not set explicitly in the provided code).
+- primis Staking: The address of the Primis staking contract.
 - instadapp, lybraFinance, eigenLayer: Addresses of different strategies.
-- enderOracle: An instance of the IEnderOracle contract.
-- bondYieldBaseRate: A variable to store the base yield rate for Ender bonds.
+- primisOracle: An instance of the IPrimisOracle contract.
+- bondYieldBaseRate: A variable to store the base yield rate for Primis bonds.
 - balanceLastEpoch: The balance of assets at the end of the last epoch.
 - nominalYield: A variable representing the nominal yield.
 - availableFundsPercentage: The percentage of available funds.
@@ -341,8 +341,8 @@ The "EnderTreasury" smart contract is designed to manage various financial activ
 - BondYieldBaseRateUpdated(uint256 bondYieldBaseRate): An event triggered when the bond yield base rate is updated.
 
  function initializeTreasury(
-       address _endToken,
-       address _enderStaking,
+       address _prmToken,
+       address primisStaking,
        address _bond,
        address _instadapp,
        address _lybraFinance,
@@ -354,18 +354,18 @@ The "EnderTreasury" smart contract is designed to manage various financial activ
 
 
 Description:
-This function initializes the contract with key parameters, including addresses of various contracts, percentages, and the Ender Oracle.
+This function initializes the contract with key parameters, including addresses of various contracts, percentages, and the Primis Oracle.
 
 Parameters:
-- _endToken (address): Address of the END token contract.
-- _enderStaking (address): Address of the Ender staking contract.
-- _bond (address): Address of the Ender bond contract.
+- _prmToken (address): Address of the PRM token contract.
+- _primisStaking (address): Address of the Primis staking contract.
+- _bond (address): Address of the Primis bond contract.
 - _instadapp (address): Address of the Instadapp strategy contract.
 - _lybraFinance (address): Address of the LybraFinance strategy contract.
 - _eigenLayer (address): Address of the EigenLayer strategy contract.
 - _availableFundsPercentage (uint256): Percentage of available funds.
 - _reserveFundsPercentage (uint256): Percentage of reserve funds.
-- _oracle (address): Address of the Ender Oracle contract.
+- _oracle (address): Address of the Primis Oracle contract.
 
    function setAddress(address _addr, uint256 _type) public onlyOwner {
 
@@ -381,7 +381,7 @@ function setBondYieldBaseRate(uint256 _newBaseRate) public onlyOwner
 
 
 Description:
-This function enables the contract owner to set the base yield rate for Ender bonds.
+This function enables the contract owner to set the base yield rate for Primis bonds.
 
 Parameters:
 - _newBaseRate (uint256): The new bond yield base rate to be set.
@@ -426,14 +426,14 @@ This function calculates a yield multiplier based on the provided bond fee.
 Parameters:
 - bondFee (uint256): The bond fee for which to calculate the yield multiplier.
 
-function depositTreasury(EndRequest memory param, uint256 amountRequired) external onlyBond
+function depositTreasury(PrmRequest memory param, uint256 amountRequired) external onlyBond
 
 
 Description:
-This function allows authorized accounts to deposit assets into the treasury. It's typically used by the Ender bond contract.
+This function allows authorized accounts to deposit assets into the treasury. It's typically used by the Primis bond contract.
 
 Parameters:
-- param (EndRequest): A struct that contains information about the deposit request, including the staking token and the token amount.
+- param (PrmRequest): A struct that contains information about the deposit request, including the staking token and the token amount.
 - amountRequired (uint256): The amount required to be deposited.
 
 
@@ -486,33 +486,33 @@ Parameters:
 - _strategy (address): The address of the strategy from which the withdrawal should occur.
 - _withdrawAmt (uint256): The amount of assets to be withdrawn from the strategy.
 
- function withdraw(EndRequest memory param, uint256 amountRequired) external onlyBond
+ function withdraw(PrmRequest memory param, uint256 amountRequired) external onlyBond
 
 Description:
-This function allows authorized accounts to withdraw assets from the treasury. It's typically used by the Ender bond contract.
+This function allows authorized accounts to withdraw assets from the treasury. It's typically used by the Primis bond contract.
 
 Parameters:
-- param (EndRequest): A struct that contains information about the withdrawal request, including the staking token and the token amount.
+- param (PrmRequest): A struct that contains information about the withdrawal request, including the staking token and the token amount.
 - amountRequired (uint256): The amount required to be withdrawn.
   function collect(address account, uint256 amount) external onlyBond
 
 
 Description:
-This function allows authorized accounts to collect END tokens as bond rewards.
+This function allows authorized accounts to collect PRM tokens as bond rewards.
 
 Parameters:
-- account (address): The address to which the END tokens should be transferred.
-- amount (uint256): The amount of END tokens to transfer.
+- account (address): The address to which the PRN tokens should be transferred.
+- amount (uint256): The amount of PRM tokens to transfer.
 
    function mintEndToUser(address _to, uint256 _amount) external onlyBond
 
 
 Description:
-This function allows authorized accounts to mint END tokens and transfer them to a specified user.
+This function allows authorized accounts to mint PRM tokens and transfer them to a specified user.
 
 Parameters:
 - to (address): The recipient's address.
-- amount (uint256): The amount of END tokens to mint and transfer.
+- amount (uint256): The amount of PRM tokens to mint and transfer.
 
   function calculateTotalReturn(address _stEthAddress) internal view returns (uint256 totalReturn)
 
@@ -544,17 +544,17 @@ This is a fallback function that allows the contract to receive Ether. It's paya
 
 
 
-## Technical Documentation for EnderStaking Contract
+## Technical Documentation for PrimisStaking Contract
 
 ### Contract Structure
 
-The EnderStaking contract is structured as follows:
+The PrimisStaking contract is structured as follows:
 
 ### Initialization
 
 function initialize(address _end, address _sEnd) external initializer
 
-  - Description: Initializes the contract with essential parameters, including the END token and sEnd token addresses.
+  - Description: Initializes the contract with essential parameters, including the PRM token and sPRM token addresses.
 
 ### Ownership Control:
 
@@ -563,7 +563,7 @@ function initialize(address _end, address _sEnd) external initializer
   - Description: Allows the contract owner to set various contract addresses.
   - Parameters:
     - addr: The address to be updated.
-    - _type: Type of address to update (e.g., enderBond, enderTreasury, endToken, sEndToken, keeper, stEth).
+    - _type: Type of address to update (e.g., primisBond, primisTreasury, prmToken, sPrmToken, keeper, stEth).
 
   function setBondRewardPercentage(uint256 percent) external onlyOwner
   - Description: Sets the bond reward percentage.
@@ -574,15 +574,15 @@ function initialize(address _end, address _sEnd) external initializer
 
 function stake(uint256 amount) external
 
-  - Description: Allows users to stake END tokens and receive sEnd tokens as a result.
+  - Description: Allows users to stake PRM tokens and receive sPrm tokens as a result.
   - Parameters:
-    - amount: The amount of END tokens to stake.
+    - amount: The amount of PRM tokens to stake.
 
    function withdraw(uint256 amount) external
 
-  - Description: Allows users to withdraw their staked END tokens along with rewards in sEnd tokens.
+  - Description: Allows users to withdraw their staked PRM tokens along with rewards in sPrm tokens.
   - Parameters:
-    - amount: The amount of END tokens to withdraw.
+    - amount: The amount of PRM tokens to withdraw.
 
 
 
@@ -593,26 +593,26 @@ function stake(uint256 amount) external
 
    function epochStakingReward(address _asset) public
 
-  - Description: Calculates and distributes rewards to the bond contract and the EnderStaking contract.
+  - Description: Calculates and distributes rewards to the bond contract and the PrimisStaking contract.
   - Parameters:
     - _asset: The asset for which rewards are calculated.
 
 ### Token Conversion and Rebase
-function calculateSEndTokens(uint256 _endAmount) public view returns (uint256 sEndTokens)
+function calculateSPrmTokens(uint256 _endAmount) public view returns (uint256 sPrmTokens)
 
-  - Description: Converts END tokens to sEnd tokens based on the rebasing index.
+  - Description: Converts PRM tokens to sPrm tokens based on the rebasing index.
   - Parameters:
-    - _endAmount: The amount of END tokens to convert.
+    - _endAmount: The amount of PRM tokens to convert.
 
 function calculateRebaseIndex() internal {
 
-  - Description: Calculates and updates the rebasing index based on the balance of END and sEnd tokens in the contract.
+  - Description: Calculates and updates the rebasing index based on the balance of PRM and sPrm tokens in the contract.
 
    function claimRebaseValue(uint256 _sendAMount) internal view returns (uint256 reward)
 
-  - Description: Calculates the reward amount in END tokens based on the rebasing index.
+  - Description: Calculates the reward amount in PRM tokens based on the rebasing index.
   - Parameters:
-    - _sendAmount: The amount of sEnd tokens to claim.
+    - _sendAmount: The amount of sPrm tokens to claim.
 
 
 
