@@ -5,7 +5,7 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "../interfaces/IEnderBond.sol";
+import "../interfaces/IPrimisBond.sol";
 import "hardhat/console.sol";
 
 error ZeroAddress();
@@ -52,7 +52,7 @@ event BaseURIChanged(string newURI);
      */
     function initialize(address bond_, string memory baseURI_) public initializer {
         __Ownable_init();
-        __ERC721_init("Ender Bond NFT", "END-BOND");
+        __ERC721_init("PRM Bond NFT", "PRM-BOND");
 
         setBondContract(bond_);
         setBaseURI(baseURI_);
