@@ -20,3 +20,4 @@ module.exports = {
     "@typescript-eslint/no-var-requires": "off",
   },
 };
+.
