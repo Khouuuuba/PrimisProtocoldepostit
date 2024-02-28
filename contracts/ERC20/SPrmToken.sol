@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "hardhat/console.sol";
 
-contract SEndToken is ERC20Upgradeable, AccessControlUpgradeable {
+contract SPrmToken is ERC20Upgradeable, AccessControlUpgradeable {
     address public staking;
     bool enableOrDisableTX;
 
@@ -28,7 +28,7 @@ contract SEndToken is ERC20Upgradeable, AccessControlUpgradeable {
 event TransactionStatusChanged(uint256 newStatus);
 event WhitelistChanged(address indexed whitelistingAddress, bool indexed action);
     function initialize() external initializer {
-        __ERC20_init("sEndToken", "sEnd");
+        __ERC20_init("sPrmToken", "sPrm");
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         setStatus(1);
         status = 1;
