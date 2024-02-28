@@ -5,8 +5,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 // Interfaces
-import "../interfaces/IEndToken.sol";
-import "../interfaces/IEnderBond.sol";
+import "../interfaces/IPrmToken.sol";
+import "../interfaces/IPrimisBond.sol";
 import "hardhat/console.sol";
 
 error ZeroAddress();
@@ -20,10 +20,10 @@ error VestingNotCompleted();
 error WaitingTimeNotCompleted();
 
 /**
- * @title EndToken contract
- * @notice Implements Ender Protocol's rebasing token - END
+ * @title PrmToken contract
+ * @notice Implements Primis Protocol's rebasing token - PRM
  */
-contract EndToken is IEndToken, ERC20Upgradeable, AccessControlUpgradeable {
+contract PrmToken is IPrmToken, ERC20Upgradeable, AccessControlUpgradeable {
     address public treasury;
     address public admin;
 
@@ -59,7 +59,7 @@ contract EndToken is IEndToken, ERC20Upgradeable, AccessControlUpgradeable {
 
     // minter role hash
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant ENDERBOND_ROLE = keccak256("ENDERBOND_ROLE");
+    bytes32 public constant PRIMISBOND_ROLE = keccak256("PRIMISBOND_ROLE");
 
     mapping(address => bool) public excludeWallets;
 
@@ -77,13 +77,13 @@ contract EndToken is IEndToken, ERC20Upgradeable, AccessControlUpgradeable {
     event GetMintedEnd(uint256 time, uint256 withdrawAmount);
 
     /**
-     * @notice Initializes the EndToken contract
+     * @notice Initializes the PrmToken contract
      */
     function initialize() external initializer {
-        __ERC20_init("End Token", "END");
+        __ERC20_init("Prm Token", "PRM");
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(ENDERBOND_ROLE, enderBond);
+        _grantRole(PRIMISBOND_ROLE, primisBond);
         admin = msg.sender;
         // add exclude wallets
         excludeWallets[address(this)] = true;
@@ -211,7 +211,7 @@ contract EndToken is IEndToken, ERC20Upgradeable, AccessControlUpgradeable {
             super._transfer(from, to, amount);
         } else {
             uint256 fee = (amount * refractionFeePercentage) / 100;
-            console.log("Refraction fees deducted in End token:- ", fee);
+            console.log("Refraction fees deducted in Prm token:- ", fee);
 
             if (fee != 0) {
                 unchecked {
@@ -226,17 +226,17 @@ contract EndToken is IEndToken, ERC20Upgradeable, AccessControlUpgradeable {
     }
 
     // function distributeRefractionFees() external onlyRole(DEFAULT_ADMIN_ROLE) {
-    function distributeRefractionFees() external onlyRole(ENDERBOND_ROLE) {
+    function distributeRefractionFees() external onlyRole(PRIMISBOND_ROLE) {
         // if (lastEpoch + 1 days > block.timestamp) revert InvalidEarlyEpoch();
         uint256 feesToTransfer = refractionFeeTotal;
         if (feesToTransfer != 0) {
             refractionFeeTotal = 0;
             console.log("Total Refraction fees:- ", feesToTransfer);
             lastEpoch = block.timestamp;
-            _approve(address(this), enderBond, feesToTransfer);
-            IEnderBond(enderBond).epochRewardShareIndex(feesToTransfer);
-            // _transfer(address(this), enderBond, feesToTransfer);
-            emit RefractionFeesDistributed(enderBond, feesToTransfer);
+            _approve(address(this), primisBond, feesToTransfer);
+            IPrimisBond(primisBond).epochRewardShareIndex(feesToTransfer);
+            // _transfer(address(this), primisBond, feesToTransfer);
+            emit RefractionFeesDistributed(primisBond, feesToTransfer);
         }
         console.log("Total Refraction fees outside if block:- ", feesToTransfer);
     }
