@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-interface IEnderBond {
+interface IPrimisBond {
     function calculateBondRewardAmount(uint256 _tokenId) external returns (uint256 _reward);
 
     function endMint() external returns (uint256 _endMint);
