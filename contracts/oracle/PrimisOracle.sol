@@ -4,17 +4,17 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "../interfaces/IEnderOracle.sol";
+import "../interfaces/IPrimisOracle.sol";
 
 error InvalidParams();
 
-contract EnderOracle is IEnderOracle, Initializable, OwnableUpgradeable {
+contract PrimisOracle is IPrimisOracle, Initializable, OwnableUpgradeable {
     mapping(address => address) public priceFeed;
 
     event UpdateFeed(address[] tokens, address[] feeds);
 
     /**
-     * @notice Initialize the contract and set the END token address
+     * @notice Initialize the contract and set the PRM token address
      */
     function initialize() external initializer {
         __Ownable_init();
