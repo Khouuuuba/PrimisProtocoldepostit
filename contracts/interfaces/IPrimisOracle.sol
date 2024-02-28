@@ -7,6 +7,6 @@ interface IPriceFeed {
     function latestAnswer() external view returns (int256);
 }
 
-interface IEnderOracle {
+interface IPrimisOracle {
     function getPrice(address) external view returns (uint256, uint8);
 }
