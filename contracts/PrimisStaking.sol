@@ -49,7 +49,7 @@ contract PrimisStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
     event WhitelistChanged(bool indexed action);
     event newSigner(address _signer);
   
-    function initialize(address _end, address _sPrm, address _signer) external initializer {
+    function initialize(address _prm, address _sPrm, address _signer) external initializer {
         __Ownable_init();
         signer = _signer;
         // setAddress(_primisBond, 1);
