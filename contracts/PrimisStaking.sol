@@ -57,8 +57,8 @@ contract PrimisStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
         stakingEnable = true; // for testing purpose
         unstakeEnable = true;   // for testing purpose
         stakingContractPause = true; // for testing purpose
-        setAddress(_end, 3);
-        setAddress(_sEnd, 4);
+        setAddress(_prm, 3);
+        setAddress(_sPrm, 4);
         bondRewardPercentage = 10;
     }
 
