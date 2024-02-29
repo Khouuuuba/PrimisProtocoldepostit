@@ -7,14 +7,14 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@chainlink/contracts/src/v0.8/automation/KeeperCompatible.sol";
 
-import "./strategy/eigenlayer/EnderELStrategy.sol";
+import "./strategy/eigenlayer/PrimisELStrategy.sol";
 
 // Interfaces
-import "./interfaces/IEndToken.sol";
-import "./interfaces/IEnderOracle.sol";
+import "./interfaces/IPrmToken.sol";
+import "./interfaces/IPrimisOracle.sol";
 import "./interfaces/IInstadappLite.sol";
 import "./interfaces/ILybraFinance.sol";
-import "./interfaces/IEnderBond.sol";
+import "./interfaces/IPrimisBond.sol";
 import "hardhat/console.sol";
 
 error NotAllowed();
@@ -27,7 +27,7 @@ error ZeroAmount();
 error InvalidRatio();
 error NotEnoughAvailableFunds();
 
-contract EnderTreasury is Initializable, OwnableUpgradeable, EnderELStrategy {
+contract PrimisTreasury is Initializable, OwnableUpgradeable, PrimisELStrategy {
     mapping(address => bool) public strategies;
     mapping(address => uint256) public fundsInfo;
     mapping(address => uint256) public totalAssetStakedInStrategy;
@@ -36,16 +36,16 @@ contract EnderTreasury is Initializable, OwnableUpgradeable, EnderELStrategy {
 
     mapping(address => address) public strategyToReceiptToken;
 
-    address private endToken;
-    address private enderBond;
-    address private enderDepositor;
-    address public enderStaking;
+    address private prmToken;
+    address private primisBond;
+    address private primisDepositor;
+    address public primisStaking;
     address public instadapp;
     address public lybraFinance;
     address public eigenLayer;
     address public priorityStrategy;
     // address public stEthELS;
-    IEnderOracle private enderOracle;
+    IPrimisOracle private PrimisOracle;
 
     uint256 public bondYieldBaseRate;
     uint256 public balanceLastEpoch;
@@ -73,16 +73,16 @@ event TreasuryWithdraw(address indexed asset, uint256 amount);
 event StrategyDeposit(address indexed asset, address indexed strategy, uint256 amount);
 event StrategyWithdraw(address indexed asset, address indexed strategy, uint256 amount);
 event Collect(address indexed account, uint256 amount);
-event MintEndToUser(address indexed to, uint256 amount);
+event MintPrmToUser(address indexed to, uint256 amount);
 
     /**
-     * @notice Initialize the contract and set the END token address
-     * @param _endToken  Address of END token contract
-     * @param _bond  Address of Ender bond contract
+     * @notice Initialize the contract and set the PRM token address
+     * @param _prmToken  Address of PRM token contract
+     * @param _bond  Address of Primis bond contract
      */
     function initializeTreasury(
-        address _endToken,
-        address _enderStaking,
+        address _prmToken,
+        address _primisStaking,
         address _bond,
         address _instadapp,
         address _lybraFinance,
@@ -93,15 +93,15 @@ event MintEndToUser(address indexed to, uint256 amount);
     ) external initializer {
         if (_availableFundsPercentage != 70 && _reserveFundsPercentage != 30) revert InvalidRatio();
         __Ownable_init();
-        enderStaking = _enderStaking;
-        enderOracle = IEnderOracle(_oracle);
+        primisStaking = _primisStaking;
+        primisOracle = IPrimisOracle(_oracle);
         instadapp = _instadapp;
         lybraFinance = _lybraFinance;
         eigenLayer = _eigenLayer;
         strategies[instadapp] = true;
         strategies[lybraFinance] = true;
         strategies[eigenLayer] = true;
-        setAddress(_endToken, 1);
+        setAddress(_prmToken, 1);
         setAddress(_bond, 2);
         setBondYieldBaseRate(300);
         priorityStrategy = instadapp;
@@ -114,12 +114,12 @@ event MintEndToUser(address indexed to, uint256 amount);
     }
 
     modifier onlyBond() {
-        if (msg.sender != enderBond) revert NotAllowed();
+        if (msg.sender != primisBond) revert NotAllowed();
         _;
     }
 
     modifier onlyStaking() {
-        if (msg.sender != enderStaking) revert NotAllowed();
+        if (msg.sender != primisStaking) revert NotAllowed();
         _;
     }
 
@@ -133,10 +133,10 @@ event MintEndToUser(address indexed to, uint256 amount);
     function setAddress(address _addr, uint256 _type) public onlyOwner {
         if (_addr == address(0)) revert ZeroAddress();
 
-        if (_type == 1) endToken = _addr;
-        else if (_type == 2) enderBond = _addr;
-        else if (_type == 3) enderDepositor = _addr;
-        else if (_type == 4) enderOracle = IEnderOracle(_addr);
+        if (_type == 1) prmToken = _addr;
+        else if (_type == 2) primisBond = _addr;
+        else if (_type == 3) primisDepositor = _addr;
+        else if (_type == 4) primisOracle = IPrimisOracle(_addr);
 
         else if (_type == 5) strategyToReceiptToken[instadapp] = _addr;
         else if (_type == 6) strategyToReceiptToken[lybraFinance] = _addr;
@@ -162,15 +162,15 @@ event MintEndToUser(address indexed to, uint256 amount);
     }
 
     function getAddress(uint256 _type) external view returns (address addr) {
-        if (_type == 1) addr = endToken;
-        else if (_type == 2) addr = enderBond;
-        else if (_type == 3) addr = enderDepositor;
-        else if (_type == 4) addr = address(enderOracle);
+        if (_type == 1) addr = prmToken;
+        else if (_type == 2) addr = primisBond;
+        else if (_type == 3) addr = primisDepositor;
+        else if (_type == 4) addr = address(primisOracle);
     }
 
     /**
-     * @notice Set ender strategy addresses
-     * @param _strs Addresses of ender strategies
+     * @notice Set primis strategy addresses
+     * @param _strs Addresses of primis strategies
      * @param _flag Bool flag for active or inactive
      */
     function setStrategy(address[] calldata _strs, bool _flag) external onlyOwner {
@@ -193,7 +193,7 @@ event MintEndToUser(address indexed to, uint256 amount);
          emit NominalYieldUpdated(_nominalYield);
     }
 
-    function depositTreasury(EndRequest memory param, uint256 amountRequired) external onlyBond {
+    function depositTreasury(PrmRequest memory param, uint256 amountRequired) external onlyBond {
         unchecked {
             if (amountRequired > 0) {
                 withdrawFromStrategy(param.stakingToken, priorityStrategy, amountRequired);
@@ -211,7 +211,7 @@ event MintEndToUser(address indexed to, uint256 amount);
     }
 
     function stakeRebasingReward(address _tokenAddress) public onlyStaking returns (uint256 rebaseReward) {
-        uint256 bondReturn = IEnderBond(enderBond).endMint();
+        uint256 bondReturn = IPrimisBond(primisBond).prmMint();
         console.log("Bond return:- ", bondReturn);
         uint256 depositReturn = calculateDepositReturn(_tokenAddress);
         balanceLastEpoch = IERC20(_tokenAddress).balanceOf(address(this));
@@ -228,21 +228,21 @@ event MintEndToUser(address indexed to, uint256 amount);
             //we get the eth price in 8 decimal and  depositReturn= 18 decimal  bondReturn = 18decimal
             // (uint256 ethPrice, uint256 ethDecimal) = enderOracle.getPrice(address(0));
             // console.log("Price of Eth:- ", ethPrice);
-            // (uint256 priceEnd, uint256 endDecimal) = enderOracle.getPrice(address(endToken));
-            // console.log("Price of End:- ", priceEnd);
-            (uint stETHPool, uint ENDSupply) = ETHDenomination(_tokenAddress);
-            depositReturn = (depositReturn * stETHPool * 1000) / ENDSupply;
+            // (uint256 pricePrm, uint256 prmDecimal) = primisOracle.getPrice(address(prmToken));
+            // console.log("Price of Prm:- ", pricePrm);
+            (uint stETHPool, uint PrmSupply) = ETHDenomination(_tokenAddress);
+            depositReturn = (depositReturn * stETHPool * 1000) / PRMSupply;
             // depositReturn = (ethPrice * depositReturn) / (10 ** ethDecimal);
-            // bondReturn = (priceEnd * bondReturn) / (10 ** endDecimal);
+            // bondReturn = (pricePrm * bondReturn) / (10 ** prmDecimal);
             console.log("Deposit return in Dollar:- ", depositReturn);
             console.log("Bond return in Dollar:- ", bondReturn);
             rebaseReward = ((depositReturn + ((depositReturn * nominalYield )/10000) - bondReturn));
             console.log("Rebase reward in dollar:- ", rebaseReward);
-            // rebaseReward = ((rebaseReward * 10 ** ethDecimal) / priceEnd);
+            // rebaseReward = ((rebaseReward * 10 ** ethDecimal) / pricePrm);
             console.log("Rebase reward:- ", rebaseReward);
             epochWithdrawl = 0;
             epochDeposit = 0;
-            IEnderBond(enderBond).resetEndMint();
+            IPrimisBond(primisBond).resetPrmMint();
             address receiptToken = strategyToReceiptToken[instadapp];
             instaDappLastValuation = IInstadappLite(instadapp).viewStinstaTokens(IERC20(receiptToken).balanceOf(address(this)));
             instaDappWithdrawlValuations = 0;
