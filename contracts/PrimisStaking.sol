@@ -4,10 +4,10 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import "./interfaces/ISEndToken.sol";
-import "./interfaces/IEnderTreasury.sol";
-import "./interfaces/ISEndToken.sol";
-import "./interfaces/IEnderBond.sol";
+import "./interfaces/ISPrmToken.sol";
+import "./interfaces/IPrimisTreasury.sol";
+import "./interfaces/ISPrimisToken.sol";
+import "./interfaces/IPrimisBond.sol";
 import "hardhat/console.sol";
 
 error ZeroAddress();
@@ -15,16 +15,16 @@ error InvalidAmount();
 error NotKeeper();
 error NotAllowed();
 
-contract EnderStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
+contract PrimisStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
     string private constant SIGNING_DOMAIN = "stakingContract";
     string private constant SIGNATURE_VERSION = "1";
     uint public bondRewardPercentage;
     uint public rebasingIndex;
     address public signer;
-    address public endToken;
-    address public sEndToken;
-    address public enderTreasury;
-    address public enderBond;
+    address public prmToken;
+    address public sPrmToken;
+    address public primisTreasury;
+    address public primisBond;
     address public keeper;
     address public stEth;
     bool public isWhitelisted;
@@ -52,8 +52,8 @@ contract EnderStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
     function initialize(address _end, address _sEnd, address _signer) external initializer {
         __Ownable_init();
         signer = _signer;
-        // setAddress(_enderBond, 1);
-        // setAddress(_enderTreasury, 2);
+        // setAddress(_primisBond, 1);
+        // setAddress(_primisTreasury, 2);
         stakingEnable = true; // for testing purpose
         unstakeEnable = true;   // for testing purpose
         stakingContractPause = true; // for testing purpose
@@ -101,10 +101,10 @@ contract EnderStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
     function setAddress(address _addr, uint256 _type) public onlyOwner {
         if (_addr == address(0)) revert ZeroAddress();
 
-        if (_type == 1) enderBond = _addr;
-        else if (_type == 2) enderTreasury = _addr;
-        else if (_type == 3) endToken = _addr;
-        else if (_type == 4) sEndToken = _addr;
+        if (_type == 1) primisBond = _addr;
+        else if (_type == 2) primisTreasury = _addr;
+        else if (_type == 3) prmToken = _addr;
+        else if (_type == 4) sPrmToken = _addr;
         else if (_type == 5) keeper = _addr;
         else if (_type == 6) stEth = _addr;
 
@@ -137,17 +137,17 @@ contract EnderStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
             address signAddress = _verify(userSign);
             require(signAddress == signer && userSign.user == msg.sender, "user is not whitelisted");
         }
-        console.log("\nEnd token deposit:- ", amount);
-        if(ISEndToken(endToken).balanceOf(address(this)) == 0){
-            uint256 sEndAmount = calculateSEndTokens(amount);
-            console.log("Receipt token:- ", sEndAmount);
-            ISEndToken(sEndToken).mint(msg.sender, sEndAmount);
-            ISEndToken(endToken).transferFrom(msg.sender, address(this), amount);
+        console.log("\nPrm token deposit:- ", amount);
+        if(ISPrmToken(prmToken).balanceOf(address(this)) == 0){
+            uint256 sPrmAmount = calculateSPrmTokens(amount);
+            console.log("Receipt token:- ", sPrmAmount);
+            ISPrmToken(sPrmToken).mint(msg.sender, sPrmAmount);
+            ISPrmToken(PrmToken).transferFrom(msg.sender, address(this), amount);
         } else {
-            ISEndToken(endToken).transferFrom(msg.sender, address(this), amount);
-            uint256 sEndAmount = calculateSEndTokens(amount);
-            console.log("Receipt token:- ", sEndAmount);
-            ISEndToken(sEndToken).mint(msg.sender, sEndAmount);
+            ISPrmToken(prmToken).transferFrom(msg.sender, address(this), amount);
+            uint256 sPrmAmount = calculateSPrmTokens(amount);
+            console.log("Receipt token:- ", sPrmAmount);
+            ISPrmToken(sPrmToken).mint(msg.sender, sPrmAmount);
         }
         epochStakingReward(stEth);
         emit Stake(msg.sender, amount);
@@ -159,14 +159,14 @@ contract EnderStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
      */
     function unstake(uint256 amount) external unstakeEnabled stakingContractPaused{
         if (amount == 0) revert InvalidAmount();
-        if (ISEndToken(sEndToken).balanceOf(msg.sender) < amount) revert InvalidAmount();
+        if (ISPrmToken(sPrmToken).balanceOf(msg.sender) < amount) revert InvalidAmount();
         // add reward
         epochStakingReward(stEth);
         uint256 reward = claimRebaseValue(amount);
         console.log("\nWithraw amount of staking contract:- ", reward);
         // transfer token
-        ISEndToken(endToken).transfer(msg.sender, reward);
-        ISEndToken(sEndToken).burn(msg.sender, amount);
+        ISPrmToken(prmToken).transfer(msg.sender, reward);
+        ISPrmToken(sPrmToken).burn(msg.sender, amount);
         emit unStake(msg.sender, amount);
 
 
@@ -175,34 +175,34 @@ contract EnderStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
 
     function epochStakingReward(address _asset) public  {
         // if (msg.sender != keeper) revert NotKeeper();
-        uint256 totalReward = IEnderTreasury(enderTreasury).stakeRebasingReward(_asset);
+        uint256 totalReward = IPrimisTreasury(primisTreasury).stakeRebasingReward(_asset);
         uint256 rw2 = (totalReward * bondRewardPercentage) / 100;
         console.log("Rebase reward for bond holder's:- ", rw2);
-        uint256 sendTokens = calculateSEndTokens(rw2);
-        ISEndToken(sEndToken).mint(enderBond, sendTokens);
-        ISEndToken(endToken).mint(address(this), totalReward);
-        IEnderBond(enderBond).epochRewardShareIndexForSend(sendTokens);
+        uint256 sprmTokens = calculateSPrmTokens(rw2);
+        ISPrmToken(sPrmToken).mint(prmBond, sendTokens);
+        ISPrmToken(prmToken).mint(address(this), totalReward);
+        IPrimisBond(primisBond).epochRewardShareIndexForSend(sendTokens);
         calculateRebaseIndex();
          emit EpochStakingReward(_asset, totalReward, rw2, sendTokens);  
     }
 
-    function calculateSEndTokens(uint256 _endAmount) public view returns (uint256 sEndTokens) {
+    function calculateSPrmTokens(uint256 _endAmount) public view returns (uint256 sPrmTokens) {
         if (rebasingIndex == 0) {
-            sEndTokens = _endAmount;
-            return sEndTokens;
+            sPrmTokens = _prmAmount;
+            return sPrmTokens;
         } else{
-            sEndTokens = (_endAmount/ rebasingIndex); 
-            return sEndTokens; 
+            sPrmTokens = (_prmAmount/ rebasingIndex); 
+            return sPrmTokens; 
         }
     }
 
     function calculateRebaseIndex() internal {
-        uint256 endBalStaking = ISEndToken(endToken).balanceOf(address(this));
-        uint256 sEndTotalSupply = ISEndToken(sEndToken).totalSupply();
-        if (endBalStaking == 0 || sEndTotalSupply == 0) {
+        uint256 prmBalStaking = ISPrmToken(prmToken).balanceOf(address(this));
+        uint256 sPrmTotalSupply = ISPrmToken(sPrmToken).totalSupply();
+        if (prmBalStaking == 0 || sPrmTotalSupply == 0) {
             rebasingIndex = 1;
         } else {
-            rebasingIndex = endBalStaking * 10e18/ sEndTotalSupply;
+            rebasingIndex = prmBalStaking * 10e18/ sPrmTotalSupply;
         }
     }
 
