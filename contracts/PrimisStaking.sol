@@ -186,7 +186,7 @@ contract PrimisStaking is Initializable, EIP712Upgradeable, OwnableUpgradeable {
          emit EpochStakingReward(_asset, totalReward, rw2, sendTokens);  
     }
 
-    function calculateSPrmTokens(uint256 _endAmount) public view returns (uint256 sPrmTokens) {
+    function calculateSPrmTokens(uint256 _prmAmount) public view returns (uint256 sPrmTokens) {
         if (rebasingIndex == 0) {
             sPrmTokens = _prmAmount;
             return sPrmTokens;
