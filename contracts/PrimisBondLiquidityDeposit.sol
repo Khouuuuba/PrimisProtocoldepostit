@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 import "contracts/interfaces/ISTETH.sol";
 import "hardhat/console.sol";
 
-contract EnderBondLiquidityDeposit is Initializable, EIP712Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract PrimisBondLiquidityDeposit is Initializable, EIP712Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     string private constant SIGNING_DOMAIN = "depositContract";
     string private constant SIGNATURE_VERSION = "1";
 
@@ -17,9 +17,9 @@ contract EnderBondLiquidityDeposit is Initializable, EIP712Upgradeable, OwnableU
     address public lido; // address of lido
     address public signer; // address of signer
     address public admin; // address of admin
-    address public enderBond; // address of enderBond
+    address public enderBond; // address of primisBond
     uint256 public index; // undex is used to track user info
-    uint256 public minDepositAmount; // minimum deposit amount for EnderBondLiquidityDeposit
+    uint256 public minDepositAmount; // minimum deposit amount for PrimisBondLiquidityDeposit
     uint256 public rewardShareIndex; // overall reward share index for users
     bool public depositEnable; // Used for go live on a particular time
     // @notice A mapping that indicates whether a token is bondable.
@@ -147,7 +147,7 @@ contract EnderBondLiquidityDeposit is Initializable, EIP712Upgradeable, OwnableU
 
         if (_type == 1) stEth = _addr;
         else if (_type == 2) lido = _addr;
-        else if (_type == 3) enderBond = _addr;
+        else if (_type == 3) primisBond = _addr;
     }
 
     /**
